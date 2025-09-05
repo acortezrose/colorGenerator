@@ -1,0 +1,31 @@
+#root {
+	max-width: 1400px;
+	margin: 0 auto auto auto;
+	padding: 0;
+	text-align: left;
+	font-size: 1rem;
+	line-height: 1.5;
+	font-family: "IBM Plex Sans", systen-ui, sans-serif;
+	font-optical-sizing: auto;
+	font-weight: 400;
+	font-variation-settings: "wdth" 100;
+}
+
+*::selection {
+	background: #000;
+	color: #ffffff;
+}
+*::-moz-selection {
+	background: #000;
+	color: #ffffff;
+}
+*::-webkit-selection {
+	background: #000;
+	color: #ffffff;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	a:nth-of-type(2) .logo {
+		animation: logo-spin infinite 20s linear;
+	}
+}
