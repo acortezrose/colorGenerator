@@ -60,7 +60,7 @@ h3 {
 }
 
 h1 {
-	font-size: 2.75em;
+	font-size: 3em;
 	line-height: 1.1;
 	margin: 0;
 }
@@ -170,6 +170,39 @@ button:focus-visible {
 	opacity: 1;
 	transition-duration: 0.85s;
 	transform: translate3d(-50%, -50%, 0) scale3d(1.2, 1.2, 1.2);
+}
+
+.error {
+	position: absolute;
+	width: 20rem;
+	bottom: 1.5rem;
+	left: calc(100vw / 2 - 4rem);
+	z-index: 1;
+	background: #fafafa;
+	border: solid 1px #fff;
+	text-align: center;
+	padding: 0.875rem 1.25rem;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0, 0, 0, 0.05),
+		0 1px 2px rgba(0, 0, 0, 0.04), 0 3px 6px rgba(0, 0, 0, 0.03),
+		0 12px 24px rgba(0, 0, 0, 0.02), 0 16px 32px rgba(0, 0, 0, 0.02);
+	border-radius: 0.5em;
+	animation: 250ms slide-in cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes slide-in {
+	from {
+		translate: 0 24px;
+	}
+
+	to {
+		translate: 0 0;
+	}
+}
+
+.error p {
+	margin: 0;
+	padding: 0;
+	font-weight: 500;
 }
 
 form {
