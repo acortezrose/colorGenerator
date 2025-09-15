@@ -325,6 +325,103 @@ function App() {
 										result="effect1_foregroundBlur_4740_1055"
 									/>
 								</filter>`;
+			const rect = `<path d="M44.6021 17.5996L67.4652 30.7996V57.1996L44.6021 70.3996L21.7391 57.1996V30.7996L44.6021 17.5996Z" fill="url(#paint1_linear_4785_5848)"/>
+				<path d="M44.6013 43.6122V70.3978L21.7383 57.1978V30.7979L44.6013 43.6122Z" fill="${hexShift2}"/> 
+				<defs>
+				<linearGradient id="paint1_linear_4785_5848" x1="44.6021" y1="17.5996" x2="44.6021" y2="70.3996" gradientUnits="userSpaceOnUse">
+						<stop stop-color="${hexShift2}"/>
+						<stop offset="1" stop-color="${hexShift1}"/>
+				</linearGradient></defs>`;
+			const circle = `<path d="M68.6002 56.1004C68.6002 62.783 57.7655 68.2004 44.4002 68.2004C31.0349 68.2004 20.2002 62.783 20.2002 56.1004C20.2002 37.3177 20.2002 31.9004 20.2002 31.9004H68.6002C68.6002 31.9004 68.6002 52.575 68.6002 56.1004Z"
+														fill="url(#paint1_linear_4785_5842)"
+													/>
+													<ellipse
+														cx="44.4002"
+														cy="31.8998"
+														rx="24.2"
+														ry="12.1"
+														fill="${hexShift1}"
+													/>
+													<defs>
+														<linearGradient
+															id="paint1_linear_4785_5842"
+															x1="68.6002"
+															y1="50.0504"
+															x2="20.2002"
+															y2="50.0504"
+															gradientUnits="userSpaceOnUse"
+														>
+															<stop stop-color="${hexShift1}" />
+															<stop offset="1" stop-color="${hexShift2}" />
+														</linearGradient>
+													</defs>`;
+
+			const pentagram = `<path
+														d="M32.7011 19.7998H56.9025L45.3934 38.0615L49.7934 67.5579H25.5889L21.1934 38.0418L32.7011 19.7998Z"
+														fill="${hexShift2}"
+													/>
+													<path
+														d="M56.8998 19.7998L68.4076 38.0418L64.012 67.5579H49.7876L45.392 38.0418L56.8998 19.7998Z"
+														fill="${hexShift1}"
+													/>
+													<path
+														d="M45.3934 38.0618L49.7934 67.5581H25.5889L21.1934 38.042L45.3934 38.0618Z"
+														fill="${hexShift2}"
+													/>
+													<path
+														d="M45.3934 38.0618L49.7934 67.5581H25.5889L21.1934 38.042L45.3934 38.0618Z"
+														fill="url(#paint1_linear_4785_5854)"
+													/>
+													<path
+														d="M32.7011 19.7998H56.9025L45.3934 38.0615L21.1934 38.0418L32.7011 19.7998Z"
+														fill="url(#paint2_linear_4785_5854)"
+													/>
+													<defs>
+														<linearGradient
+															id="paint1_linear_4785_5854"
+															x1="35.4934"
+															y1="38.042"
+															x2="35.4934"
+															y2="67.5581"
+															gradientUnits="userSpaceOnUse"
+														>
+															<stop stop-color="${hexShift2}" />
+															<stop offset="1" stop-color="${hexShift1}" />
+														</linearGradient>
+														<linearGradient
+															id="paint2_linear_4785_5854"
+															x1="39.0479"
+															y1="19.7998"
+															x2="39.0479"
+															y2="38.0615"
+															gradientUnits="userSpaceOnUse"
+														>
+															<stop stop-color="${hexShift2}" />
+															<stop offset="1" stop-color="${hexShift1}" />
+														</linearGradient>
+													</defs>`;
+			const triangle = `<path
+														d="M33.2004 15.4004L72.8004 55.0004L64.0004 63.8004L24.4004 24.2004L33.2004 15.4004Z"
+														fill="url(#paint1_linear_4785_5836)"
+													/>
+													<path
+														d="M24.4004 24.2002L64.0004 63.8002H24.4004V24.2002Z"
+														fill="${hexShift2}"
+													/>
+													<defs>
+														<linearGradient
+															id="paint1_linear_4785_5836"
+															x1="48.6004"
+															y1="15.4004"
+															x2="48.6004"
+															y2="63.8004"
+															gradientUnits="userSpaceOnUse"
+														>
+															<stop stop-color="${hexShift2}" />
+															<stop offset="1" stop-color="${hexShift1}" />
+														</linearGradient>
+													</defs>`;
+			const shapeArray = [circle, triangle, pentagram, rect];
 			var svg;
 
 			if (allData.style === "Gradient") {
@@ -351,6 +448,27 @@ function App() {
 			} else if (allData.style === "Flat") {
 				svg =
 					svgStart +
+					svgEnd +
+					`<defs><linearGradient
+									id="paint0_linear_4740_1055"
+									x1="44"
+									y1="0"
+									x2="44"
+									y2="88"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stop-color="white" stop-opacity="0.7" />
+									<stop offset="1" stop-color="#4A5669" />
+								</linearGradient>
+								<clipPath id="clip0_4740_1055">
+									<rect width="88" height="88" rx="44" fill="white" />
+								</clipPath>
+							</defs>
+						</svg>`;
+			} else {
+				svg =
+					svgStart +
+					shapeArray[idx % shapeArray.length] +
 					svgEnd +
 					`<defs><linearGradient
 									id="paint0_linear_4740_1055"
@@ -461,7 +579,7 @@ function App() {
 							<Select
 								name="style"
 								label="Style"
-								options={["Gradient", "Flat"]}
+								options={["Gradient", "Flat", "Shapes"]}
 								value={allData.style}
 								onChange={updateData}
 								style={{
