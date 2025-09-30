@@ -20,7 +20,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		const { name, required } = props;
 
 		return (
-			<label htmlFor={name} className="input-group">
+			<label htmlFor={name} className="input-group input-group-layout">
 				{label}
 				<input
 					{...props}
