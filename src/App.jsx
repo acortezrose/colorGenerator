@@ -33,6 +33,8 @@ function App() {
 		swatchColorDarkTint11: "rgba(0,0,0,.11)",
 		swatchColorDarkTint12: "rgba(0,0,0,.12)",
 		swatchColorDarkTint20: "rgba(0,0,0,.2)",
+		swatchColorDarkTint90: "rgba(0,0,0,.9)",
+		swatchColorDarkTint40: "rgba(0,0,0,.4)",
 	});
 
 	const updateData = (event) => {
@@ -229,6 +231,8 @@ function App() {
 					swatchColorDarkTint11: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .11)`,
 					swatchColorDarkTint12: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .12)`,
 					swatchColorDarkTint20: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .2)`,
+					swatchColorDarkTint40: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .4)`,
+					swatchColorDarkTint90: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .9)`,
 					circleSamples: samples,
 				}));
 			}
@@ -283,8 +287,10 @@ function App() {
 	return (
 		<div>
 			{/* TODO: switch to using tailwind where possible */}
+			{/* TODO: a real mobile experience */}
 			<div className="grid">
 				<div className="min-w-xs gap-6 p-8 pr-4 flex flex-col relative overflow-scroll">
+					{/* TODO: rename? */}
 					<h1>Profile Palette Generator</h1>
 					<div
 						style={{
@@ -305,7 +311,7 @@ function App() {
 								onValueChange={handleColorSpaceChange}
 							>
 								<SelectTrigger
-									className="select"
+									className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
 									style={{
 										background: swatchData.swatchColorDarkTint11,
 										color: swatchData.swatchColorDarkTint,
@@ -357,7 +363,7 @@ function App() {
 								}
 							>
 								<SelectTrigger
-									className="select"
+									className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
 									style={{
 										background: swatchData.swatchColorDarkTint11,
 										color: swatchData.swatchColorDarkTint,
@@ -387,7 +393,7 @@ function App() {
 								}
 							>
 								<SelectTrigger
-									className="select"
+									className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
 									style={{
 										background: swatchData.swatchColorDarkTint11,
 										color: swatchData.swatchColorDarkTint,
@@ -408,19 +414,29 @@ function App() {
 					{swatchData.circleSamples.length > 0 && (
 						<button
 							onClick={downloadSVGs}
-							className="text-base medium w-full button"
+							className="will-change-transform rounded-[15px] text-base medium w-full button cursor-pointer hover:scale-[1.03] active:scale-[0.98] transition"
 						>
-							<span
+							<div
+								className="p-px bg-blue-500 rounded-[15px]"
 								style={{
-									borderTop: "1px solid rgba(255,255,255,.8)",
-									borderBottom: "2px solid rgba(0,0,0,.2)",
-									background: swatchData.swatchColorDarkTint,
-									outline: `2px solid ${swatchData.swatchColorDarkTint20}`,
-									boxShadow: `0px 1px 3px ${swatchData.swatchColorDarkTint12}, 0px 6px 6px ${swatchData.swatchColorDarkTint11}, 0px 13px 8px ${swatchData.swatchColorDarkTint07}, 0px 24px 9px ${swatchData.swatchColorDarkTint03}`,
+									background: "#ffffff",
+									backgroundImage: `linear-gradient(to top, ${swatchData.swatchColorDarkTint40}, ${swatchData.swatchColorDarkTint90}, ${swatchData.swatchColorDarkTint90}, ${swatchData.swatchColorDarkTint40}`,
 								}}
 							>
-								Download SVGs
-							</span>
+								<span
+									className="rounded-xl"
+									style={{
+										// borderTop: "1px solid rgba(255,255,255,.8)",
+										// borderBottom: "2px solid rgba(0,0,0,.2)",
+										background: swatchData.swatchColorDarkTint,
+										background: `radial-gradient(ellipse at top, ${swatchData.swatchColorDarkTint90} 0%, ${swatchData.swatchColorDarkTint} 100%`,
+										//outline: `2px solid ${swatchData.swatchColorDarkTint20}`,
+										boxShadow: `0px 2px 3px ${swatchData.swatchColorDarkTint12}, 0px 4px 8px ${swatchData.swatchColorDarkTint11}, 0px 13px 8px ${swatchData.swatchColorDarkTint07}, 0px 24px 9px ${swatchData.swatchColorDarkTint03}, inset 0 3px 4px 0 rgba(255,255,255,.3)`,
+									}}
+								>
+									Download SVGs
+								</span>
+							</div>
 						</button>
 					)}
 				</div>

@@ -129,7 +129,7 @@ input[type="number"] {
 .button {
 	border: none;
 	background: none;
-	border-radius: 0.5em;
+	/* border-radius: 0.5em; */
 	margin: 0;
 	padding: 0;
 	transition: 200ms cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -137,7 +137,7 @@ input[type="number"] {
 
 .button span {
 	display: block;
-	border-radius: 80px;
+	/* border-radius: 80px; */
 	border: none;
 	padding: 0.857em 1.2em;
 	font-family: inherit;
@@ -153,66 +153,16 @@ input[type="number"] {
 .button:focus span,
 .button:focus-visible span {
 	border-color: #646cff;
-	border-radius: 0.5em;
+	/* border-radius: 0.5em; */
 	background: oklch(0.2 0.3 260 / 1);
 }
-.button:focus,
 .button:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 2px white, 0 0 0 4px black;
 }
 
-/* .select {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	border: none;
-	padding: 0.166em 0.375em;
-	border-radius: 0.1875em;
-	text-align: center;
-} */
-
-.exampleBtn {
-	padding: 12px 24px;
-	background-color: hsl(222, 100%, 95%);
-	color: hsl(243, 80%, 62%);
-	position: relative;
-	border-radius: 6px;
-	overflow: hidden;
-	z-index: 1;
-}
-
-.exampleBtn span {
-	z-index: 1;
-	position: relative;
-}
-
-.exampleBtn::before {
-	content: "";
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 140px;
-	height: 140px;
-	border-radius: 50%;
-	transform: translate3d(-50%, -50%, 0) scale3d(0, 0, 0);
-	transition: opacity 0.4s cubic-bezier(0.19, 1, 0.22, 1),
-		transform 0.75s cubic-bezier(0.19, 1, 0.22, 1);
-	background-color: hsl(243, 80%, 62%);
-	opacity: 0;
-}
-
-.exampleBtn:hover span {
-	color: hsl(222, 100%, 95%);
-}
-
-.exampleBtn:hover::before {
-	opacity: 1;
-	transition-duration: 0.85s;
-	transform: translate3d(-50%, -50%, 0) scale3d(1.2, 1.2, 1.2);
-}
-
-.error.text-sm.plex-sans {
-	border: solid 1px rgb(250, 250, 250, 1);
+.error {
+	border: solid 1px rgb(250, 250, 250, 0.6);
 	outline: solid 1px rgba(0, 0, 0, 0.4);
 	background: #222;
 	color: white;
