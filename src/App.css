@@ -44,15 +44,6 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-a {
-	font-weight: 500;
-	color: #646cff;
-	text-decoration: inherit;
-}
-a:hover {
-	color: #535bf2;
-}
-
 body {
 	margin: 0;
 	display: flex;
@@ -100,7 +91,7 @@ h3 {
 }
 
 h1 {
-	font-size: 3em;
+	font-size: 5em;
 	line-height: 1.1;
 	margin: 0;
 }
@@ -129,7 +120,6 @@ input[type="number"] {
 .button {
 	border: none;
 	background: none;
-	/* border-radius: 0.5em; */
 	margin: 0;
 	padding: 0;
 	transition: 200ms cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -137,7 +127,6 @@ input[type="number"] {
 
 .button span {
 	display: block;
-	/* border-radius: 80px; */
 	border: none;
 	padding: 0.857em 1.2em;
 	font-family: inherit;
@@ -153,7 +142,6 @@ input[type="number"] {
 .button:focus span,
 .button:focus-visible span {
 	border-color: #646cff;
-	/* border-radius: 0.5em; */
 	background: oklch(0.2 0.3 260 / 1);
 }
 .button:focus-visible {
@@ -245,7 +233,7 @@ hr {
 	border: solid 1px rgba(0, 0, 0, 0.08);
 	padding: 1em;
 	border-radius: 3.75em;
-	overflow: scroll;
+	overflow: auto;
 }
 
 @media (max-width: 768px) {
@@ -255,23 +243,8 @@ hr {
 	.grid > div:first-of-type {
 		height: auto;
 		padding: 1rem;
-		order: 2;
 	}
 	.grid .card {
-		margin: 1rem;
 		justify-content: center;
 	}
 }
-
-/* @media (prefers-color-scheme: light) {
-	:root {
-		color: #213547;
-		background-color: #ffffff;
-	}
-	a:hover {
-		color: #747bff;
-	}
-	button {
-		background-color: #f9f9f9;
-	}
-} */

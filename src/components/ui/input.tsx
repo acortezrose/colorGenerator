@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { ChangeEventHandler, FocusEventHandler } from "react";
+import * as React from "react";
 
 type InputProps = {
 	name: string;
@@ -9,7 +10,7 @@ type InputProps = {
 	value: string | number;
 	min?: number;
 	max?: number;
-	error: string | null;
+	error?: string | null;
 	required?: boolean;
 	onChange: ChangeEventHandler<HTMLInputElement>;
 	onBlur?: FocusEventHandler<HTMLInputElement>;
