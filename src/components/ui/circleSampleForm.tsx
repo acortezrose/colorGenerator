@@ -9,7 +9,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { convertColor, convertFromOklch } from "@/utils/colors.jsx";
-import * as JSZip from "jszip";
+import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as culori from "culori";
 import * as React from "react";
