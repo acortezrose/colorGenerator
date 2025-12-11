@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import * as React from "react";
+import { useRef, useState } from "react";
+import { Toaster, toast } from "sonner";
 
 interface CircleSampleFormProps {
 	allData: any;
@@ -8,10 +10,34 @@ interface CircleSampleFormProps {
 }
 
 export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
+	// https://stackoverflow.com/questions/39501289/in-reactjs-how-to-copy-text-to-clipboard
+	const textAreaRef = useRef(null);
+
+	async function copyToClipboard(e) {
+		try {
+			const html = new XMLSerializer().serializeToString(textAreaRef.current);
+			navigator.clipboard.writeText(html);
+			e.target.focus();
+			toast("SVG copied!");
+		} catch (err) {
+			{
+				toast(err.message);
+			}
+		}
+	}
+
 	return (
 		<>
-			<motion.div key={i} className="sample">
+			<motion.div
+				key={i}
+				className="sample will-change-transform hover:scale-108 active:scale-98 transition-transform duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer"
+				role="button"
+				onClick={copyToClipboard}
+				aria-label={`Copy SVG ${i + 1}`}
+			>
+				{" "}
 				<motion.svg
+					ref={textAreaRef}
 					width="88"
 					height="88"
 					viewBox="0 0 88 88"
@@ -28,10 +54,11 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 						mass: 1,
 						delay: i * 0.003,
 					}}
+					className="w-full h-full"
 				>
-					<title>Profile background {i + 1}</title>
+					<title>Avatar {i + 1}</title>
 					<g clipPath="url(#clip0_4740_1055)">
-						<rect width="88" height="88" rx="44" fill={color.css} />
+						<rect width="88" height="88" rx="24" fill={color.css} />
 						{allData.style === "Gradient" && (
 							<>
 								<g filter="url(#filter0_f_4740_1055)">
@@ -50,11 +77,11 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 						)}
 					</g>
 					<rect
-						x="1.1"
-						y="1.1"
-						width="85.8"
-						height="85.8"
-						rx="42.9"
+						x="1"
+						y="1"
+						width="86"
+						height="86"
+						rx="24"
 						stroke="url(#paint0_linear_4740_1055)"
 						strokeWidth="2.2"
 						style={{ mixBlendMode: "overlay" }}
@@ -118,7 +145,7 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 							<stop offset="1" stopColor="#4A5669" />
 						</linearGradient>
 						<clipPath id="clip0_4740_1055">
-							<rect width="88" height="88" rx="44" fill="white" />
+							<rect width="88" height="88" rx="24" fill="white" />
 						</clipPath>
 					</defs>
 				</motion.svg>
