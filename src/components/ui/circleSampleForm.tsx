@@ -106,7 +106,7 @@ export function CircleSampleForm({
 					width: "100%",
 					height: "5.25em",
 					borderRadius: "0.5em",
-					border: `1px solid ${swatchData.swatchColorDarkTint20}`,
+					border: "1px solid rgba(0,0,0,.1)",
 					background: swatchData.swatchColor,
 					flexShrink: 0,
 				}}

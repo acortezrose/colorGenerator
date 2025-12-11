@@ -87,7 +87,7 @@ function App() {
 					/>
 				</div>
 
-				<div className="card">
+				<div className="card m-8 flex flex-row flex-wrap align content-start gap-4 p-6 overflow-auto">
 					{/* Samples */}
 					<AnimatePresence>
 						{swatchData.circleSamples.map((color, i) => (
