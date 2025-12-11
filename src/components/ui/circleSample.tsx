@@ -13,6 +13,12 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 	// https://stackoverflow.com/questions/39501289/in-reactjs-how-to-copy-text-to-clipboard
 	const textAreaRef = useRef(null);
 
+	function sampleKeyDown(e) {
+		if (e.key === "Enter" || e.key === " ") {
+			copyToClipboard(e);
+		}
+	}
+
 	async function copyToClipboard(e) {
 		try {
 			const html = new XMLSerializer().serializeToString(textAreaRef.current);
@@ -30,9 +36,11 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 		<>
 			<motion.div
 				key={i}
-				className="rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition-transform duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer"
+				className="rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
 				role="button"
+				tabIndex={0}
 				onClick={copyToClipboard}
+				onKeyDown={sampleKeyDown}
 				aria-label={`Copy SVG ${i + 1}`}
 			>
 				{" "}

@@ -88,21 +88,21 @@ function App() {
 				</div>
 
 				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex overflow-hidden flex-col">
-					<div className="bg-neutral-100 card flex flex-row flex-wrap align content-start gap-4 p-6 overflow-auto">
+					<ul className="bg-neutral-100 card flex flex-row flex-wrap align content-start gap-4 p-6 overflow-auto">
 						{/* Samples */}
 						<AnimatePresence>
 							{swatchData.circleSamples.map((color, i) => (
-								<motion.div key={i} className="sample">
+								<motion.li key={i} className="sample">
 									<CircleSample
 										allData={allData}
 										swatchData={swatchData}
 										color={color}
 										i={i}
 									/>
-								</motion.div>
+								</motion.li>
 							))}
 						</AnimatePresence>
-					</div>
+					</ul>
 				</div>
 			</div>
 			<Toaster position="bottom-right" />

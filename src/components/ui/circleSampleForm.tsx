@@ -89,7 +89,7 @@ export function CircleSampleForm({
 		<>
 			{/* TODO: rename? */}
 			<div>
-				<h1>Okavatar</h1>
+				<h1>okavatar</h1>
 				<p className="text-base mt-1">
 					By{" "}
 					<a
