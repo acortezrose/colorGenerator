@@ -203,14 +203,14 @@ hr {
 	height: 100vh;
 }
 
-.grid > div:first-of-type::before {
+.grid::before {
 	content: "";
 	top: 0px;
 	left: 0px;
 	width: 100%;
 	height: 10em;
 	background-size: 8px 8px;
-	mask-image: linear-gradient(162deg, black 0%, transparent 50%);
+	mask-image: linear-gradient(173deg, black 0%, transparent 50%);
 	position: absolute;
 	background-color: transparent;
 	background-image: radial-gradient(
