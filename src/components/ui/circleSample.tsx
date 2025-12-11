@@ -30,7 +30,7 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 		<>
 			<motion.div
 				key={i}
-				className="sample will-change-transform hover:scale-108 active:scale-98 transition-transform duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer"
+				className="rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition-transform duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer"
 				role="button"
 				onClick={copyToClipboard}
 				aria-label={`Copy SVG ${i + 1}`}
@@ -57,8 +57,8 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 					className="w-full h-full"
 				>
 					<title>Avatar {i + 1}</title>
-					<g clipPath="url(#clip0_4740_1055)">
-						<rect width="88" height="88" rx="24" fill={color.css} />
+					<g clipPath="url(#clip0_4740_1055) ">
+						<rect width="88" height="88" fill={color.css} />
 						{allData.style === "Gradient" && (
 							<>
 								<g filter="url(#filter0_f_4740_1055)">
@@ -76,16 +76,6 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 							</>
 						)}
 					</g>
-					<rect
-						x="1.1"
-						y="1.1"
-						width="85.9"
-						height="85.9"
-						rx="23.1"
-						stroke="url(#paint0_linear_4740_1055)"
-						strokeWidth="2.2"
-						style={{ mixBlendMode: "overlay" }}
-					/>
 					<defs>
 						{allData.style === "Gradient" && (
 							<>
@@ -145,7 +135,7 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 							<stop offset="1" stopColor="#4A5669" />
 						</linearGradient>
 						<clipPath id="clip0_4740_1055">
-							<rect width="88" height="88" rx="24" fill="white" />
+							<rect width="88" height="88" fill="white" />
 						</clipPath>
 					</defs>
 				</motion.svg>

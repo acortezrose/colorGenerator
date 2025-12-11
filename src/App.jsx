@@ -87,20 +87,22 @@ function App() {
 					/>
 				</div>
 
-				<div className="card m-8 flex flex-row flex-wrap align content-start gap-4 p-6 overflow-auto">
-					{/* Samples */}
-					<AnimatePresence>
-						{swatchData.circleSamples.map((color, i) => (
-							<motion.div key={i} className="sample">
-								<CircleSample
-									allData={allData}
-									swatchData={swatchData}
-									color={color}
-									i={i}
-								/>
-							</motion.div>
-						))}
-					</AnimatePresence>
+				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex overflow-hidden flex-col">
+					<div className="card flex flex-row flex-wrap align content-start gap-4 p-6 overflow-auto">
+						{/* Samples */}
+						<AnimatePresence>
+							{swatchData.circleSamples.map((color, i) => (
+								<motion.div key={i} className="sample">
+									<CircleSample
+										allData={allData}
+										swatchData={swatchData}
+										color={color}
+										i={i}
+									/>
+								</motion.div>
+							))}
+						</AnimatePresence>
+					</div>
 				</div>
 			</div>
 			<Toaster position="bottom-right" />
