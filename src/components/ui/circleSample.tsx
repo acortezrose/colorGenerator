@@ -77,11 +77,11 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 						)}
 					</g>
 					<rect
-						x="1"
-						y="1"
-						width="86"
-						height="86"
-						rx="24"
+						x="1.1"
+						y="1.1"
+						width="85.9"
+						height="85.9"
+						rx="23.1"
 						stroke="url(#paint0_linear_4740_1055)"
 						strokeWidth="2.2"
 						style={{ mixBlendMode: "overlay" }}
