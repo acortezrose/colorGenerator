@@ -95,7 +95,7 @@ export function CircleSampleForm({
 					<a
 						target="_blank"
 						href="https://www.alexandracortez.com/"
-						className="text-black border border-0 border-b-1 border-dotted border-neutral-400 hover:border-black"
+						className="text-black border border-0 border-b-1 border-dotted border-neutral-400 hover:border-black focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)] rounded transition-shadow ease"
 					>
 						Alexandra Cortez
 					</a>
