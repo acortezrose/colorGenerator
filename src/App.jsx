@@ -79,7 +79,7 @@ function App() {
 			{/* TODO: a real mobile experience */}
 			<div className="mask-overlay md:grid md:grid-cols-[1fr_3fr] h-screen w-full">
 				{/* Form */}
-				<div className="md:min-w-70 w-full gap-6 p-8 md:pr-4 flex flex-col relative overflow-auto">
+				<div className="md:min-w-80 w-full gap-6 p-8 md:pr-4 flex flex-col relative overflow-auto">
 					<CircleSampleForm
 						allData={allData}
 						setAllData={setAllData}
@@ -88,7 +88,7 @@ function App() {
 				</div>
 				{/* Samples Container */}
 				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden">
-					<ul className="bg-neutral-100 card gap-5 p-6 overflow-auto">
+					<ul className="bg-neutral-100 card gap-5 p-6 overflow-auto md:gutter-stable">
 						{/* Samples */}
 						<AnimatePresence>
 							{swatchData.circleSamples.map((color, i) => (
