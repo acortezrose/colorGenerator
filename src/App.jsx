@@ -87,8 +87,8 @@ function App() {
 					/>
 				</div>
 				{/* Samples Container */}
-				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden">
-					<ul className="bg-neutral-100 card gap-5 p-6 overflow-auto md:gutter-stable">
+				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden  md:gutter-stable">
+					<ul className="bg-neutral-100 card gap-5 p-6 overflow-auto gutter-stable">
 						{/* Samples */}
 						<AnimatePresence>
 							{swatchData.circleSamples.map((color, i) => (

@@ -214,7 +214,6 @@ hr {
 
 .gutter-stable {
 	scrollbar-gutter: stable;
-	min-width: 0; /* allow the right column to shrink inside the grid */
 }
 
 .mask-overlay::before {
