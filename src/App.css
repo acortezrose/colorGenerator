@@ -42,6 +42,7 @@ body {
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	scrollbar-gutter: stable;
 }
 
 body {
@@ -201,6 +202,10 @@ hr {
 	);
 }
 
+.gutter-stable {
+	scrollbar-gutter: stable;
+}
+
 @media all and (max-width: 768px) {
 	.card {
 		display: flex;
@@ -210,13 +215,13 @@ hr {
 		/* flex-grow: 1; */
 		flex-basis: calc((100% / 4) - 1rem);
 	}
+
+	.gutter-stable {
+		scrollbar-gutter: auto;
+	}
 }
 
-.gutter-stable {
-	scrollbar-gutter: stable;
-}
-
-.mask-overlay::before {
+.mask-overlay > div:first-of-type::before {
 	content: "";
 	top: 0px;
 	left: 0px;
@@ -224,7 +229,7 @@ hr {
 	height: 10em;
 	background-size: 8px 8px;
 	mask-image: linear-gradient(173deg, black 0%, transparent 50%);
-	position: absolute;
+	position: fixed;
 	background-color: transparent;
 	background-image: radial-gradient(
 		oklch(from #c8c9cc l c h / 100%) 1px,

@@ -77,18 +77,20 @@ function App() {
 		<div className="w-full">
 			{/* TODO: switch to using tailwind where possible */}
 			{/* TODO: a real mobile experience */}
-			<div className="mask-overlay md:grid md:grid-cols-[1fr_3fr] h-screen w-full">
+			<div className="mask-overlay md:grid md:grid-cols-[1fr_3fr] w-full relative">
 				{/* Form */}
-				<div className="md:min-w-80 w-full gap-6 p-8 md:pr-4 flex flex-col relative overflow-auto">
-					<CircleSampleForm
-						allData={allData}
-						setAllData={setAllData}
-						swatchData={swatchData}
-					/>
+				<div className="md:min-w-80 w-full">
+					<div className="md:sticky md:top-0 md:self-start  gap-6 p-8 md:pr-4 flex flex-col">
+						<CircleSampleForm
+							allData={allData}
+							setAllData={setAllData}
+							swatchData={swatchData}
+						/>
+					</div>
 				</div>
 				{/* Samples Container */}
-				<div className="rounded-[40px] m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden  md:gutter-stable">
-					<ul className="bg-neutral-100 card gap-5 p-6 overflow-auto gutter-stable">
+				<div className="rounded-[56px] mt-8 md:m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden  md:gutter-stable">
+					<ul className="bg-neutral-100 card gap-5 p-8 gutter-stable">
 						{/* Samples */}
 						<AnimatePresence>
 							{swatchData.circleSamples.map((color, i) => (
