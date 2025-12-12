@@ -89,7 +89,7 @@ function App() {
 					</div>
 				</div>
 				{/* Samples Container */}
-				<div className="rounded-[56px] mt-8 md:m-8 border border-1 border-[rgba(0, 0, 0, 0.08)] flex flex-col overflow-hidden  md:gutter-stable">
+				<div className="rounded-[56px] rounded-b-none md:rounded-[56px] mt-8 md:m-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden  md:gutter-stable">
 					<ul className="bg-neutral-100 card gap-5 p-8 gutter-stable">
 						{/* Samples */}
 						<AnimatePresence>
