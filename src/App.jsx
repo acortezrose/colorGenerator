@@ -74,10 +74,10 @@ function App() {
 	]);
 
 	return (
-		<div className="w-full">
+		<div className="w-full gutter-stable">
 			{/* TODO: switch to using tailwind where possible */}
 			{/* TODO: a real mobile experience */}
-			<div className="mask-overlay md:grid md:grid-cols-[1fr_3fr] w-full relative">
+			<div className="mask-overlay md:grid md:grid-cols-[1fr_3fr] w-full relative gutter-stable">
 				{/* Form */}
 				<div className="md:min-w-80 w-full">
 					<div className="md:sticky md:top-0 md:self-start  gap-6 p-8 md:pr-4 flex flex-col">

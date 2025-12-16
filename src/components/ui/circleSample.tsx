@@ -12,9 +12,12 @@ interface CircleSampleFormProps {
 export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 	// https://stackoverflow.com/questions/39501289/in-reactjs-how-to-copy-text-to-clipboard
 	const textAreaRef = useRef(null);
+	const message = "Copied!";
+	const [messageOpacity, setMessageOpacity] = useState("0");
 
 	function sampleKeyDown(e) {
 		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
 			copyToClipboard(e);
 		}
 	}
@@ -24,7 +27,10 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 			const html = new XMLSerializer().serializeToString(textAreaRef.current);
 			navigator.clipboard.writeText(html);
 			e.target.focus();
-			toast("SVG copied!");
+			setMessageOpacity("1");
+			setTimeout(() => {
+				setMessageOpacity("0");
+			}, 2500);
 		} catch (err) {
 			{
 				toast(err.message);
@@ -36,14 +42,22 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 		<>
 			<motion.div
 				key={i}
-				className="rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
+				className="relative rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
 				role="button"
 				tabIndex={0}
 				onClick={copyToClipboard}
 				onKeyDown={sampleKeyDown}
 				aria-label={`Copy SVG ${i + 1}`}
 			>
-				{" "}
+				<div
+					id="message"
+					className="absolute inset-0 flex items-center justify-center top-0 left-0 text-white z-10 transition ease duration-150 text-sm font-medium"
+					style={{ opacity: messageOpacity }}
+				>
+					<div className="bg-black/40 rounded py-0.5 px-1.5">
+						<p>{message}</p>
+					</div>
+				</div>{" "}
 				<motion.svg
 					ref={textAreaRef}
 					width="88"
