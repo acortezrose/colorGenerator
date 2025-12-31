@@ -5,6 +5,7 @@ import { convertColor, validateColorInput } from "@/utils/colors.jsx";
 import { generateCircleSamples } from "@/utils/harmony.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster, toast } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
 	const [allData, setAllData] = useState({
@@ -108,6 +109,7 @@ function App() {
 				</div>
 			</div>
 			<Toaster position="bottom-right" />
+			<Analytics />
 		</div>
 	);
 }
