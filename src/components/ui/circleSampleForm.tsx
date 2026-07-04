@@ -73,7 +73,7 @@ export function CircleSampleForm({
 				start: `<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4740_1055)"><rect width="88" height="88" fill="${hex}" />`,
 				gradient: `<g filter="url(#filter0_f_4740_1055)"><path d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z" fill="${hexShift1}" /></g><g filter="url(#filter1_f_4740_1055)"><path d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z" fill="${hexShift2}" /></g>`,
 				end: `</g>`,
-				defs: `<defs><filter id="filter0_f_4740_1055" x="-24.1998" y="-52.8004" width="158.4" height="137.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix" /><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" /><feGaussianBlur stdDeviation="13.2" result="effect1_foregroundBlur_4740_1055" /></filter><filter id="filter1_f_4740_1055" x="4.4" y="-24.1996" width="98.9998" height="81.4002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood floodOpacity="0" result="BackgroundImageFix" /><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" /><feGaussianBlur stdDeviation="8.8" result="effect1_foregroundBlur_4740_1055" /></filter><linearGradient id="paint0_linear_4740_1055" x1="44" y1="0" x2="44" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity="0.7" /><stop offset="1" stop-color="#4A5669" /></linearGradient><clipPath id="clip0_4740_1055"><rect width="88" height="88" fill="white" /></clipPath></defs></svg>`,
+				defs: `<defs><filter id="filter0_f_4740_1055" x="-24.1998" y="-52.8004" width="158.4" height="137.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="13.2" result="effect1_foregroundBlur_4740_1055" /></filter><filter id="filter1_f_4740_1055" x="4.4" y="-24.1996" width="98.9998" height="81.4002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="8.8" result="effect1_foregroundBlur_4740_1055" /></filter><linearGradient id="paint0_linear_4740_1055" x1="44" y1="0" x2="44" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity="0.7" /><stop offset="1" stop-color="#4A5669" /></linearGradient><clipPath id="clip0_4740_1055"><rect width="88" height="88" fill="white" /></clipPath></defs></svg>`,
 			};
 			const svg =
 				allData.style === "Gradient"
@@ -153,9 +153,9 @@ export function CircleSampleForm({
 					name="numberInput"
 					label="Number"
 					type="number"
-					placeholder="1 – 20"
+					placeholder="1 – 52"
 					min={1}
-					max={20}
+					max={52}
 					value={allData.numberInput}
 					onChange={updateData}
 					required
