@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -209,9 +210,12 @@ export function CircleSampleForm({
 				</div>
 			</div>
 			{swatchData.circleSamples.length > 0 && (
-				<button
+				<motion.button
 					onClick={downloadSVGs}
-					className="will-change-transform rounded-[15px] text-base medium w-full button cursor-pointer hover:scale-[1.03] active:scale-[0.98] transition"
+					className="will-change-transform rounded-[15px] text-base medium w-full button cursor-pointer"
+					whileHover={{ scale: 1.04 }}
+					whileTap={{ scale: 0.98 }}
+					transition={{ type: "spring", stiffness: 500, damping: 25 }}
 				>
 					<div
 						className="p-px bg-blue-500 rounded-[15px]"
@@ -234,7 +238,7 @@ export function CircleSampleForm({
 							Download SVGs
 						</span>
 					</div>
-				</button>
+				</motion.button>
 			)}
 		</>
 	);

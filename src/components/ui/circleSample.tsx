@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import { useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
@@ -12,8 +12,27 @@ interface CircleSampleFormProps {
 export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 	// https://stackoverflow.com/questions/39501289/in-reactjs-how-to-copy-text-to-clipboard
 	const textAreaRef = useRef(null);
-	const message = "Copied!";
-	const [messageOpacity, setMessageOpacity] = useState("0");
+	const copyString = "Copied!";
+	const splitCopy = copyString.split("");
+	const message = splitCopy.map((char, i) => {
+		return (
+			<motion.span
+				key={"message=" + char}
+				transition={{
+					type: "spring",
+					stiffness: 300,
+					damping: 20,
+					delay: i * 0.015,
+				}}
+				initial={{ top: "1rem" }}
+				animate={{ top: 0 }}
+				className="relative"
+			>
+				{char}
+			</motion.span>
+		);
+	});
+	const [hasMessage, setHasMessage] = useState(false);
 
 	function sampleKeyDown(e) {
 		if (e.key === "Enter" || e.key === " ") {
@@ -27,9 +46,9 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 			const html = new XMLSerializer().serializeToString(textAreaRef.current);
 			navigator.clipboard.writeText(html);
 			e.target.focus();
-			setMessageOpacity("1");
+			setHasMessage(true);
 			setTimeout(() => {
-				setMessageOpacity("0");
+				setHasMessage(false);
 			}, 2500);
 		} catch (err) {
 			{
@@ -42,29 +61,42 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 		<>
 			<motion.div
 				key={i}
-				className="relative rounded-[24px] overflow-clip sample will-change-transform hover:scale-108 active:scale-98 transition duration-200 ease-[cubic-bezier(0.165, 0.84, 0.44, 1)] cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
+				className="relative rounded-[24px] overflow-clip sample will-change-transform cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
 				role="button"
 				tabIndex={0}
 				onClick={copyToClipboard}
 				onKeyDown={sampleKeyDown}
 				aria-label={`Copy SVG ${i + 1}`}
+				aria-live="assertive"
+				whileHover={{ scale: 1.05 }}
+				whileTap={{ scale: 0.98 }}
+				transition={{ type: "spring", stiffness: 500, damping: 25 }}
 			>
-				<div
-					id="message"
-					className="absolute inset-0 flex items-center justify-center top-0 left-0 text-white z-10 transition ease duration-150 text-sm font-medium"
-					style={{ opacity: messageOpacity }}
-				>
-					<div className="bg-black/40 rounded py-0.5 px-1.5">
-						<p>{message}</p>
-					</div>
-				</div>{" "}
-				<motion.svg
-					ref={textAreaRef}
-					width="88"
-					height="88"
-					viewBox="0 0 88 88"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
+				<AnimatePresence>
+					{hasMessage && (
+						<div
+							key={i + "-message"}
+							id="message"
+							className="absolute inset-0 flex items-center justify-center top-0 left-0 text-white z-10 transition ease duration-150 text-sm font-medium"
+						>
+							<motion.div
+								className="bg-black/40 rounded py-0.5 px-1.5"
+								transition={{
+									type: "spring",
+									stiffness: 200,
+									damping: 20,
+								}}
+								initial={{ opacity: 0, filter: "blur(6px)", scale: 0.98 }}
+								animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+								exit={{ opacity: 0, filter: "blur(8px)", scale: 0.7 }}
+							>
+								<p className="relative">{message}</p>
+							</motion.div>
+						</div>
+					)}
+				</AnimatePresence>
+
+				<motion.div
 					key={color.css}
 					initial={{ opacity: 0, filter: "blur(4px)", scale: 0.98 }}
 					animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
@@ -76,91 +108,103 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 						mass: 1,
 						delay: i * 0.006,
 					}}
-					className="w-full h-full"
+					className="relative w-full h-full"
 				>
-					<title>Avatar {i + 1}</title>
-					<g clipPath="url(#clip0_4740_1055) ">
-						<rect width="88" height="88" fill={color.css} />
-						{allData.style === "Gradient" && (
-							<>
-								<g filter="url(#filter0_f_4740_1055)">
-									<path
-										d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z"
-										fill={color.cssShift1}
-									/>
-								</g>
-								<g filter="url(#filter1_f_4740_1055)">
-									<path
-										d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z"
-										fill={color.cssShift2}
-									/>
-								</g>
-							</>
-						)}
-					</g>
-					<defs>
-						{allData.style === "Gradient" && (
-							<>
-								<filter
-									id="filter0_f_4740_1055"
-									x="-24.1998"
-									y="-52.8004"
-									width="158.4"
-									height="137.5"
-									filterUnits="userSpaceOnUse"
-									colorInterpolationFilters="sRGB"
-								>
-									<feFlood floodOpacity="0" result="BackgroundImageFix" />
-									<feBlend
-										mode="normal"
-										in="SourceGraphic"
-										in2="BackgroundImageFix"
-										result="shape"
-									/>
-									<feGaussianBlur
-										stdDeviation="13.2"
-										result="effect1_foregroundBlur_4740_1055"
-									/>
-								</filter>
-								<filter
-									id="filter1_f_4740_1055"
-									x="4.4"
-									y="-24.1996"
-									width="98.9998"
-									height="81.4002"
-									filterUnits="userSpaceOnUse"
-									colorInterpolationFilters="sRGB"
-								>
-									<feFlood floodOpacity="0" result="BackgroundImageFix" />
-									<feBlend
-										mode="normal"
-										in="SourceGraphic"
-										in2="BackgroundImageFix"
-										result="shape"
-									/>
-									<feGaussianBlur
-										stdDeviation="8.8"
-										result="effect1_foregroundBlur_4740_1055"
-									/>
-								</filter>
-							</>
-						)}
-						<linearGradient
-							id="paint0_linear_4740_1055"
-							x1="44"
-							y1="0"
-							x2="44"
-							y2="88"
-							gradientUnits="userSpaceOnUse"
-						>
-							<stop stopColor="white" stopOpacity="0.7" />
-							<stop offset="1" stopColor="#4A5669" />
-						</linearGradient>
-						<clipPath id="clip0_4740_1055">
-							<rect width="88" height="88" fill="white" />
-						</clipPath>
-					</defs>
-				</motion.svg>
+					<div className="z-1 absolute w-full h-full rounded-[24px] shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"></div>
+
+					<svg
+						ref={textAreaRef}
+						width="88"
+						height="88"
+						viewBox="0 0 88 88"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+						className="w-full h-full"
+					>
+						<title>Avatar {i + 1}</title>
+						<g clipPath="url(#clip0_4740_1055) ">
+							<rect width="88" height="88" fill={color.css} />
+							{allData.style === "Gradient" && (
+								<>
+									<g filter="url(#filter0_f_4740_1055)">
+										<path
+											d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z"
+											fill={color.cssShift1}
+										/>
+									</g>
+									<g filter="url(#filter1_f_4740_1055)">
+										<path
+											d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z"
+											fill={color.cssShift2}
+										/>
+									</g>
+								</>
+							)}
+						</g>
+						<defs>
+							{allData.style === "Gradient" && (
+								<>
+									<filter
+										id="filter0_f_4740_1055"
+										x="-24.1998"
+										y="-52.8004"
+										width="158.4"
+										height="137.5"
+										filterUnits="userSpaceOnUse"
+										colorInterpolationFilters="sRGB"
+									>
+										<feFlood floodOpacity="0" result="BackgroundImageFix" />
+										<feBlend
+											mode="normal"
+											in="SourceGraphic"
+											in2="BackgroundImageFix"
+											result="shape"
+										/>
+										<feGaussianBlur
+											stdDeviation="13.2"
+											result="effect1_foregroundBlur_4740_1055"
+										/>
+									</filter>
+									<filter
+										id="filter1_f_4740_1055"
+										x="4.4"
+										y="-24.1996"
+										width="98.9998"
+										height="81.4002"
+										filterUnits="userSpaceOnUse"
+										colorInterpolationFilters="sRGB"
+									>
+										<feFlood floodOpacity="0" result="BackgroundImageFix" />
+										<feBlend
+											mode="normal"
+											in="SourceGraphic"
+											in2="BackgroundImageFix"
+											result="shape"
+										/>
+										<feGaussianBlur
+											stdDeviation="8.8"
+											result="effect1_foregroundBlur_4740_1055"
+										/>
+									</filter>
+								</>
+							)}
+							<linearGradient
+								id="paint0_linear_4740_1055"
+								x1="44"
+								y1="0"
+								x2="44"
+								y2="88"
+								gradientUnits="userSpaceOnUse"
+							>
+								<stop stopColor="white" stopOpacity="0.7" />
+								<stop offset="1" stopColor="#4A5669" />
+							</linearGradient>
+							<clipPath id="clip0_4740_1055">
+								<rect width="88" height="88" fill="white" />
+							</clipPath>
+						</defs>
+					</svg>
+				</motion.div>
 			</motion.div>
 		</>
 	);

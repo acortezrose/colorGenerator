@@ -17,8 +17,22 @@ type InputProps = {
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-	({ label, value, type, error, ...props }, ref) => {
+	({ label, value, type, error, onChange, min, max, ...props }, ref) => {
 		const { name, required } = props;
+
+		const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+			if (type === "number" && event.target.value !== "") {
+				const num = Number(event.target.value);
+				const clamped = Math.min(
+					max ?? Infinity,
+					Math.max(min ?? -Infinity, num)
+				);
+				if (clamped !== num) {
+					event.target.value = String(clamped);
+				}
+			}
+			onChange(event);
+		};
 
 		return (
 			<label
@@ -32,6 +46,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 					type={type}
 					name={name}
 					value={value}
+					min={min}
+					max={max}
+					onChange={handleChange}
 					aria-invalid={!!error}
 					aria-errormessage={`${name}-error`}
 				/>
