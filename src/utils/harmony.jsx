@@ -1,8 +1,17 @@
 import * as culori from "culori";
 
-const generateLightnessSteps = (numSwatches, min = 0.35, max = 0.9) => {
-	const step = (max - min) / (numSwatches - 1 || 1);
-	return Array.from({ length: numSwatches }, (_, i) => max - i * step);
+const generateLightnessSteps = (numSwatches, baseLightness, min = 0.35, max = 0.9) => {
+	const levels = Math.ceil(numSwatches / 2) || 1;
+	const maxK = Math.ceil((levels - 1) / 2) || 1;
+	const stepUp = (max - baseLightness) / maxK;
+	const stepDown = (baseLightness - min) / maxK;
+	return Array.from({ length: levels }, (_, i) => {
+		if (i === 0) return baseLightness;
+		const k = Math.ceil(i / 2);
+		const sign = i % 2 === 1 ? 1 : -1;
+		const step = sign === 1 ? stepUp : stepDown;
+		return Math.min(1, Math.max(0, baseLightness + sign * k * step));
+	}).sort((a, b) => a - b);
 };
 
 export const generateCircleSamples = (baseColor, N, harmony) => {
@@ -65,12 +74,11 @@ export const generateCircleSamples = (baseColor, N, harmony) => {
 			});
 		}
 	} else if (harmony === "Complementary") {
-		const lightnessCycle = generateLightnessSteps(N);
+		const lightnessCycle = generateLightnessSteps(N, baseColor.l);
 		const hues = [h, (h + 180) % 360];
 		for (let i = 0; i < N; i++) {
-			const hue = hues[i % 2];
-			const lightness =
-				lightnessCycle[Math.floor(i / 2) % lightnessCycle.length];
+			const hue = hues[Math.floor(i / lightnessCycle.length) % 2];
+			const lightness = lightnessCycle[i % lightnessCycle.length];
 			const shiftHue1 = (hue - hueShiftFactor + 360) % 360;
 			const lightness1 = Math.min(1, lightness + lightnessShiftFactor / 1.5);
 			const lightness2 = Math.min(1, lightness + lightnessShiftFactor);

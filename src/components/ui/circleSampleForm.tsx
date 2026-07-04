@@ -55,20 +55,8 @@ export function CircleSampleForm({
 				c: sample.c,
 				h: sample.h,
 			});
-			const shift1 = culori.parse(sample.cssShift1);
-			const shift2 = culori.parse(sample.cssShift2);
-			const hexShift1 = culori.formatHex({
-				mode: "oklch",
-				l: shift1.l,
-				c: shift1.c,
-				h: shift1.h,
-			});
-			const hexShift2 = culori.formatHex({
-				mode: "oklch",
-				l: shift2.l,
-				c: shift2.c,
-				h: shift2.h,
-			});
+			const hexShift1 = culori.formatHex(culori.parse(sample.cssShift1));
+			const hexShift2 = culori.formatHex(culori.parse(sample.cssShift2));
 			const svgParts = {
 				start: `<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4740_1055)"><rect width="88" height="88" fill="${hex}" />`,
 				gradient: `<g filter="url(#filter0_f_4740_1055)"><path d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z" fill="${hexShift1}" /></g><g filter="url(#filter1_f_4740_1055)"><path d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z" fill="${hexShift2}" /></g>`,
