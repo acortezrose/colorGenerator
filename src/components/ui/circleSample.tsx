@@ -66,15 +66,15 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
 					key={color.css}
-					initial={{ opacity: 0, filter: "blur(4px)", scale: 0.96 }}
+					initial={{ opacity: 0, filter: "blur(4px)", scale: 0.98 }}
 					animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-					exit={{ opacity: 0, filter: "blur(4px)", scale: 0.5 }}
+					exit={{ opacity: 0, filter: "blur(6px)", scale: 0.7 }}
 					transition={{
 						type: "spring",
-						stiffness: 200,
+						stiffness: 150,
 						damping: 20,
 						mass: 1,
-						delay: i * 0.003,
+						delay: i * 0.006,
 					}}
 					className="w-full h-full"
 				>
