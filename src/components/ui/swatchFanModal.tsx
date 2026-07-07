@@ -71,15 +71,13 @@ export function SwatchFanModal({
 					className="fixed inset-0"
 					style={{
 						zIndex: 100,
-						background: "rgba(255,255,255,.4)",
-						backdropFilter: "blur(12px)",
-						WebkitBackdropFilter: "blur(12px)",
+						background: "rgba(255,255,255,.7)",
 						pointerEvents: phase === "open" ? "auto" : "none",
 					}}
 					initial={{ opacity: 0 }}
 					animate={{ opacity: phase === "open" ? 1 : 0 }}
 					exit={{ opacity: 0 }}
-					transition={{ duration: 0.2 }}
+					transition={{ duration: 0.4, ease: "easeOut" }}
 					onClick={onClose}
 				/>,
 				<motion.div
