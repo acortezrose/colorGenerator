@@ -55,6 +55,15 @@ export function CircleSampleForm({
 		}));
 	};
 
+	const applyFanColor = (l: number, c: number, h: number) => {
+		const hex = culori.formatHex(
+			culori.clampGamut("rgb")({ mode: "oklch", l, c, h }),
+		);
+		const next = { ...allData, colorSpace: "Hex", colorInput: hex };
+		setAllData(next);
+		setAllDataImmediate(next);
+	};
+
 	const downloadSVGs = async () => {
 		const zip = new JSZip();
 		swatchData.circleSamples.forEach((sample, idx) => {
@@ -112,12 +121,7 @@ export function CircleSampleForm({
 				open={isPickerOpen}
 				onClose={() => setIsPickerOpen(false)}
 				onSelectColor={(l, c, h) => {
-					const hex = culori.formatHex(
-						culori.clampGamut("rgb")({ mode: "oklch", l, c, h }),
-					);
-					const next = { ...allData, colorSpace: "Hex", colorInput: hex };
-					setAllData(next);
-					setAllDataImmediate(next);
+					applyFanColor(l, c, h);
 					setIsPickerOpen(false);
 				}}
 			/>

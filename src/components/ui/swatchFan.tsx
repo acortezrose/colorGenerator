@@ -112,11 +112,11 @@ export function SwatchFan({
 		}, HOVER_LEAVE_GRACE_MS);
 	};
 
-	const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+	const updatePointerFromClient = (clientX: number, clientY: number) => {
 		if (!containerRef.current) return;
 		const rect = containerRef.current.getBoundingClientRect();
-		const mx = e.clientX - rect.left;
-		const my = e.clientY - rect.top;
+		const mx = clientX - rect.left;
+		const my = clientY - rect.top;
 		const { angleDeg, distance } = getPivotRelative(
 			mx,
 			my,
@@ -140,10 +140,34 @@ export function SwatchFan({
 		setPointer({ index: closestIndex, t, x: mx, y: my });
 	};
 
-	const handleContainerClick = () => {
+	const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		updatePointerFromClient(e.clientX, e.clientY);
+	};
+
+	const commitPointerSelection = () => {
 		if (!pointer) return;
 		const { l, c } = sampleCard(pointer.t);
 		onSelectColor?.(l, c, BASE_HUES[pointer.index]);
+	};
+
+	const handleContainerClick = () => {
+		commitPointerSelection();
+	};
+
+	const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+		const touch = e.touches[0];
+		if (touch) updatePointerFromClient(touch.clientX, touch.clientY);
+	};
+
+	const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+		const touch = e.touches[0];
+		if (touch) updatePointerFromClient(touch.clientX, touch.clientY);
+	};
+
+	const handleTouchEnd = () => {
+		commitPointerSelection();
+		setHoveredIndex(null);
+		setPointer(null);
 	};
 
 	return (
@@ -153,10 +177,14 @@ export function SwatchFan({
 			onMouseMove={handleContainerMouseMove}
 			onMouseLeave={scheduleLeave}
 			onClick={handleContainerClick}
+			onTouchStart={handleTouchStart}
+			onTouchMove={handleTouchMove}
+			onTouchEnd={handleTouchEnd}
 			style={{
 				width: cardWidth * 3,
 				height: cardHeight + 60,
 				cursor: "none",
+				touchAction: "none",
 			}}
 		>
 			{BASE_HUES.map((_, i) => {
