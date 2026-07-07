@@ -23,7 +23,7 @@ const oklchCss = (l: number, c: number, h: number) =>
 
 const sampleCard = (t: number) => ({
 	l: 0.9 - t * 0.65,
-	c: 0.05 + t * 0.4,
+	c: 0.12 + t * 0.4,
 });
 
 const buildCardGradient = (hue: number) => {
@@ -198,10 +198,9 @@ export function SwatchFan({
 				return (
 					<motion.div
 						key={i}
-						initial={{ rotate: 0, opacity: 0 }}
+						initial={{ rotate: 0 }}
 						animate={{
 							rotate: angle,
-							opacity: 1,
 							y: isHovered ? -20 : 0,
 							scale: isHovered ? 1.06 : 1,
 						}}
