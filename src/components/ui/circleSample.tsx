@@ -61,7 +61,7 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 		<>
 			<motion.div
 				key={i}
-				className="relative rounded-[24px] overflow-clip sample will-change-transform cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
+				className="relative rounded-[24px] overflow-hidden sample will-change-transform cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
 				role="button"
 				tabIndex={0}
 				onClick={copyToClipboard}

@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
+import { SwatchPreview } from "@/components/ui/swatchPreview";
+import { SwatchFanModal } from "@/components/ui/swatchFanModal";
 import {
 	Select,
 	SelectContent,
@@ -14,18 +16,24 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as culori from "culori";
 import * as React from "react";
+import { useState } from "react";
 
 interface CircleSampleFormProps {
 	allData: any;
 	setAllData: any;
+	setAllDataImmediate: any;
 	swatchData: any;
 }
 
 export function CircleSampleForm({
 	allData,
 	setAllData,
+	setAllDataImmediate,
 	swatchData,
 }: CircleSampleFormProps) {
+	const [isPickerOpen, setIsPickerOpen] = useState(false);
+	const [isSwatchHovered, setIsSwatchHovered] = useState(false);
+
 	const handleColorSpaceChange = (newColorSpace) => {
 		const currentOklch = convertColor(allData.colorInput, allData.colorSpace);
 		if (currentOklch) {
@@ -90,14 +98,27 @@ export function CircleSampleForm({
 					</a>
 				</p>
 			</div>
-			<div
-				style={{
-					width: "100%",
-					height: "5.25em",
-					borderRadius: "0.5em",
-					border: "1px solid rgba(0,0,0,.1)",
-					background: swatchData.swatchColor,
-					flexShrink: 0,
+			<button
+				onClick={() => setIsPickerOpen(true)}
+				onMouseEnter={() => setIsSwatchHovered(true)}
+				onMouseLeave={() => setIsSwatchHovered(false)}
+				className="cursor-pointer w-full rounded-sm transition ease duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
+				aria-label="Open quick color picker"
+			>
+				<SwatchPreview color={swatchData.swatchColor} />
+			</button>
+			<SwatchFanModal
+				peek={isSwatchHovered && !isPickerOpen}
+				open={isPickerOpen}
+				onClose={() => setIsPickerOpen(false)}
+				onSelectColor={(l, c, h) => {
+					const hex = culori.formatHex(
+						culori.clampGamut("rgb")({ mode: "oklch", l, c, h }),
+					);
+					const next = { ...allData, colorSpace: "Hex", colorInput: hex };
+					setAllData(next);
+					setAllDataImmediate(next);
+					setIsPickerOpen(false);
 				}}
 			/>
 			<div className="form-group text-base">

@@ -1,22 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { CircleSampleForm } from "@/components/ui/circleSampleForm.jsx";
 import { CircleSample } from "@/components/ui/circleSample.jsx";
-import { convertColor, validateColorInput } from "@/utils/colors.jsx";
-import { generateCircleSamples } from "@/utils/harmony.jsx";
+import { computeSwatchData } from "@/utils/swatch.tsx";
+import { validateColorInput } from "@/utils/colors.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster, toast } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
-	const [allData, setAllData] = useState({
+	const defaults = {
 		colorSpace: "Hex",
 		colorInput: "#9400D3",
 		numberInput: 32,
 		harmony: "Equidistant",
 		style: "Gradient",
-	});
+	};
+	const [allData, setAllData] = useState(defaults);
+	const [debouncedAllData, setDebouncedAllData] = useState(defaults);
 
-	const [swatchData, setSwatchData] = useState({
+	const swatchDataRef = useRef({
 		circleSamples: [],
 		swatchColor: "white",
 		swatchColorDarkTint: "black",
@@ -29,50 +31,32 @@ function App() {
 		swatchColorDarkTint40: "rgba(0,0,0,.4)",
 	});
 
+	const swatchData = useMemo(() => {
+		const computed = computeSwatchData(debouncedAllData);
+		if (computed) {
+			swatchDataRef.current = computed;
+		}
+		return swatchDataRef.current;
+	}, [debouncedAllData]);
+
 	useEffect(() => {
 		const timeout = setTimeout(() => {
-			const isValid = validateColorInput(
-				allData.colorInput,
-				allData.colorSpace.toLowerCase()
-			);
-			if (!isValid) {
-				toast(`Invalid ${allData.colorSpace} color format`, {
-					className: "error text-sm",
-				});
-				return;
-			}
-			const convertedColor = convertColor(
-				allData.colorInput,
-				allData.colorSpace
-			);
-			if (convertedColor) {
-				const samples = generateCircleSamples(
-					convertedColor,
-					allData.numberInput,
-					allData.harmony
-				);
-				setSwatchData((prev) => ({
-					...prev,
-					swatchColor: `oklch(${convertedColor.l} ${convertedColor.c} ${convertedColor.h})`,
-					swatchColorDarkTint: `oklch(.5 ${convertedColor.c} ${convertedColor.h})`,
-					swatchColorDarkTint03: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .03)`,
-					swatchColorDarkTint07: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .07)`,
-					swatchColorDarkTint11: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .11)`,
-					swatchColorDarkTint12: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .12)`,
-					swatchColorDarkTint20: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .2)`,
-					swatchColorDarkTint40: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .4)`,
-					swatchColorDarkTint90: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .9)`,
-					circleSamples: samples,
-				}));
-			}
-		}, 500);
+			setDebouncedAllData(allData);
+		}, 250);
 		return () => clearTimeout(timeout);
-	}, [
-		allData.colorInput,
-		allData.colorSpace,
-		allData.numberInput,
-		allData.harmony,
-	]);
+	}, [allData]);
+
+	useEffect(() => {
+		const isValid = validateColorInput(
+			debouncedAllData.colorInput,
+			debouncedAllData.colorSpace.toLowerCase(),
+		);
+		if (!isValid) {
+			toast(`Invalid ${debouncedAllData.colorSpace} color format`, {
+				className: "error text-sm",
+			});
+		}
+	}, [debouncedAllData.colorInput, debouncedAllData.colorSpace]);
 
 	return (
 		<div className="w-full gutter-stable">
@@ -85,6 +69,7 @@ function App() {
 						<CircleSampleForm
 							allData={allData}
 							setAllData={setAllData}
+							setAllDataImmediate={setDebouncedAllData}
 							swatchData={swatchData}
 						/>
 					</div>
