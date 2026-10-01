@@ -1,5 +1,10 @@
 #root {
-	max-width: 1400px;
+	/* body is a centering flex container, so without this #root shrinks to
+	   fit its content instead of filling the page. */
+	width: 100%;
+	/* Set from the layout width handle (App.jsx). */
+	max-width: var(--layout-max-width, 1400px);
+	transition: max-width 300ms cubic-bezier(0.16, 1, 0.3, 1);
 	margin: 0 auto auto auto;
 	padding: 0;
 	text-align: left;
@@ -43,6 +48,10 @@ body {
 
 :root {
 	/* color-scheme: light dark; */
+	/* Faint outline plus soft lift, shared by every contained surface. */
+	--surface-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.04), 0 0.5px 1.5px 0 rgba(0, 0, 0, 0.1),
+		0 2px 3px -2px rgba(0, 0, 0, 0.05);
 	color: black;
 	background-color: #f5f5f5;
 	font-synthesis: none;
@@ -90,7 +99,6 @@ body {
 	line-height: 1.6666;
 }
 
-h1,
 h2,
 h3 {
 	font-family: "Instrument Serif", serif;
@@ -99,8 +107,13 @@ h3 {
 }
 
 h1 {
-	font-size: 5em;
-	line-height: 1.1;
+	font-family: "Big Shoulders", sans-serif;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: -0.02em;
+	line-height: 0.85;
+	opacity: 0.85;
+	white-space: nowrap;
 	margin: 0;
 }
 
@@ -184,7 +197,11 @@ hr {
 	flex-direction: column;
 	width: 100%;
 	border-radius: 0.5em;
-	border: solid 1px rgba(0, 0, 0, 0.08);
+	/* Semi-opaque and blurred, so the dot grid shows through softly. */
+	background-color: oklch(from var(--color-neutral-100) l c h / 70%);
+	backdrop-filter: blur(2px);
+	-webkit-backdrop-filter: blur(2px);
+	box-shadow: var(--surface-shadow);
 }
 
 .form-group .input-group-layout {
@@ -199,6 +216,85 @@ hr {
 	background-color: rgba(0, 0, 0, 0.02);
 }
 
+.form-group .slider-row {
+	position: relative;
+	padding: 0;
+	overflow: hidden;
+}
+
+.slider-row .slider-fill {
+	position: absolute;
+	inset: 0;
+	border-radius: 0.5em;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.slider-row .slider-label,
+.slider-row .slider-value {
+	position: relative;
+	z-index: 2;
+	padding: 0.75em 1em;
+	pointer-events: none;
+}
+
+.slider-row input[type="range"] {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Only slider sections clip, for the fill. Other groups don't, so their
+   rows' focus rings aren't cut off. */
+.slider-section {
+	overflow: hidden;
+	cursor: grab;
+	touch-action: pan-y;
+	user-select: none;
+	will-change: transform;
+}
+
+.slider-section.is-dragging {
+	cursor: grabbing;
+}
+
+.slider-section:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px white, 0 0 0 4px black;
+}
+
+.slider-handle-track {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	pointer-events: none;
+}
+
+.slider-handle {
+	position: absolute;
+	top: 50%;
+	width: 4px;
+	height: 45%;
+	border-radius: 999px;
+	opacity: 0;
+	transform: translate(-50%, -50%) scaleY(0.6);
+	transition:
+		opacity 150ms ease,
+		transform 200ms cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.slider-section:hover .slider-handle,
+.slider-section.is-dragging .slider-handle,
+.slider-section:has(input:focus-visible) .slider-handle {
+	opacity: 0.5;
+	transform: translate(-50%, -50%) scaleY(1);
+}
+
 .card {
 	display: grid;
 	width: 100%;
@@ -211,6 +307,38 @@ hr {
 
 .gutter-stable {
 	scrollbar-gutter: stable;
+}
+
+/* Thin, quiet scrollbars for the two independently scrolling columns. */
+.scroll-area::-webkit-scrollbar {
+	width: 10px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, 0.16);
+	background-clip: padding-box;
+	border: 3px solid transparent;
+	border-radius: 999px;
+}
+
+.scroll-area::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Keep the thumb clear of the samples card's 56px corners. */
+.samples-scroll-area::-webkit-scrollbar-track {
+	margin-block: 48px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+	.scroll-area {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(0, 0, 0, 0.16) transparent;
+	}
 }
 
 @media all and (max-width: 768px) {
@@ -228,19 +356,123 @@ hr {
 	}
 }
 
+/* Dot grid behind the whole page. */
 .mask-overlay > div:first-of-type::before {
 	content: "";
-	top: 0px;
-	left: 0px;
-	width: 100%;
-	height: 10em;
-	background-size: 8px 8px;
-	mask-image: linear-gradient(173deg, black 0%, transparent 50%);
+	inset: 0;
+	background-size: 24px 24px;
 	position: fixed;
 	background-color: transparent;
 	background-image: radial-gradient(
-		oklch(from #c8c9cc l c h / 100%) 1px,
+		oklch(from #c8c9cc l c h / 40%) 1px,
 		transparent 1px
 	);
 	z-index: -1;
+}
+
+/* Collapsible panel (see Disclosure). Height animates via grid rows, so no
+   measuring is needed; visibility flips only after the close finishes. */
+.disclosure-panel {
+	--disclosure-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	display: grid;
+	grid-template-rows: 0fr;
+	opacity: 0;
+	filter: blur(6px);
+	visibility: hidden;
+	transition:
+		/* Height leads; opacity and blur finish settling after it. */
+		grid-template-rows 280ms var(--disclosure-ease),
+		opacity 450ms var(--disclosure-ease),
+		filter 450ms var(--disclosure-ease),
+		visibility 0s 450ms;
+}
+
+.disclosure-panel[data-open="true"] {
+	grid-template-rows: 1fr;
+	opacity: 1;
+	/* none (not blur(0)) so the sections' backdrop blur can see the page. */
+	filter: none;
+	visibility: visible;
+	transition-delay: 0s;
+}
+
+/* Desktop column split (see LayoutDivider). */
+.layout-grid {
+	transition: grid-template-columns 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hit area straddles the column boundary; the line is a 4px rounded bar. */
+.layout-divider {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 12px;
+	margin-left: -6px;
+	z-index: 20;
+	cursor: col-resize;
+	touch-action: none;
+	transition: left 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* On the samples card's outer edge: the hit area sits mostly outside the card
+   so it doesn't cover the card's scrollbar. */
+.layout-divider--outer {
+	margin-left: -2px;
+}
+
+.layout-divider--outer .layout-divider-line {
+	left: 2px;
+}
+
+/* Follows the pointer exactly while dragging; eases back onto the snapped
+   edge on release. */
+.layout-divider.is-dragging,
+.layout-divider.no-transition {
+	transition: none;
+}
+
+.layout-divider:focus-visible {
+	outline: none;
+}
+
+/* Inset to line up with the samples card, so the rounded ends show.
+   --layout-accent is the app's accent tint, set on .layout-grid. */
+.layout-divider-line {
+	position: absolute;
+	top: 32px;
+	bottom: 32px;
+	left: 50%;
+	width: 4px;
+	border-radius: 999px;
+	background: var(--layout-accent, black);
+	opacity: 0;
+	transform: translateX(-50%) scaleY(0.96);
+	transition:
+		opacity 150ms ease,
+		transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.layout-divider:hover .layout-divider-line {
+	opacity: 0.3;
+	transform: translateX(-50%) scaleY(1);
+}
+
+.layout-divider.is-dragging .layout-divider-line {
+	opacity: 0.5;
+	transform: translateX(-50%) scaleY(1);
+}
+
+.layout-divider:focus-visible .layout-divider-line {
+	opacity: 1;
+	transform: translateX(-50%) scaleY(1);
+}
+
+/* Keyboard focus also gets a ring, so it reads differently from hover. */
+.layout-divider:focus-visible .layout-divider-line {
+	box-shadow: 0 0 0 2px white, 0 0 0 4px black;
+}
+
+body:has(.layout-divider.is-dragging) {
+	cursor: col-resize;
+	user-select: none;
 }

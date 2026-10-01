@@ -2,36 +2,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import { useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
+import { GRADIENT_STYLE_GEOMETRY } from "@/generated/gradientArchetypes.js";
 
 interface CircleSampleFormProps {
-	allData: any;
+	style: string;
 	color: any;
 	i: number;
 }
 
-export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
+// Memoized on (style, color, i) rather than the whole allData object: allData
+// changes on every keystroke/slider drag, most of which are
+// irrelevant to this swatch's own SVG (colorSpace, numberInput, hueShift,
+// etc.). Without this, each of those unrelated updates forces React to
+// re-render and diff every visible swatch's full filtered-SVG subtree for
+// nothing — that reconciliation cost is real for a live SVG (unlike a single
+// <img> leaf).
+export const CircleSample = React.memo(function CircleSample({
+	style,
+	color,
+	i,
+}: CircleSampleFormProps) {
+	const gradientGeometry = GRADIENT_STYLE_GEOMETRY[style];
 	// https://stackoverflow.com/questions/39501289/in-reactjs-how-to-copy-text-to-clipboard
 	const textAreaRef = useRef(null);
 	const copyString = "Copied!";
-	const splitCopy = copyString.split("");
-	const message = splitCopy.map((char, i) => {
-		return (
-			<motion.span
-				key={"message=" + char}
-				transition={{
-					type: "spring",
-					stiffness: 300,
-					damping: 20,
-					delay: i * 0.015,
-				}}
-				initial={{ top: "1rem" }}
-				animate={{ top: 0 }}
-				className="relative"
-			>
-				{char}
-			</motion.span>
-		);
-	});
+	// const splitCopy = copyString.split("");
+	const message = <span className="relative">{copyString}</span>;
 	const [hasMessage, setHasMessage] = useState(false);
 
 	function sampleKeyDown(e) {
@@ -96,20 +92,7 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 					)}
 				</AnimatePresence>
 
-				<motion.div
-					key={color.css}
-					initial={{ opacity: 0, filter: "blur(4px)", scale: 0.98 }}
-					animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-					exit={{ opacity: 0, filter: "blur(6px)", scale: 0.7 }}
-					transition={{
-						type: "spring",
-						stiffness: 150,
-						damping: 20,
-						mass: 1,
-						delay: i * 0.006,
-					}}
-					className="relative w-full h-full"
-				>
+				<div className="relative w-full h-full">
 					<div className="z-1 absolute w-full h-full rounded-[24px] shadow-[inset_0_0_0_1px_rgba(0,0,0,.08)]"></div>
 
 					<svg
@@ -124,70 +107,147 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 						<title>Avatar {i + 1}</title>
 						<g clipPath="url(#clip0_4740_1055) ">
 							<rect width="88" height="88" fill={color.css} />
-							{allData.style === "Gradient" && (
-								<>
-									<g filter="url(#filter0_f_4740_1055)">
-										<path
-											d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z"
-											fill={color.cssShift1}
-										/>
+							{gradientGeometry &&
+								gradientGeometry.groups.map((group) => (
+									// mask and filter deliberately live on the same <g> (not
+									// nested in separate wrapper groups) — Safari has a known
+									// bug where feGaussianBlur silently fails to apply to an
+									// element nested inside a masked group.
+									<g
+										key={group.filterId}
+										filter={`url(#${group.filterId})`}
+										mask={group.maskId ? `url(#${group.maskId})` : undefined}
+									>
+										{group.shapes.map((shape) =>
+											shape.type === "rect" ? (
+												<rect
+													key={shape.colorKey}
+													x={shape.x}
+													y={shape.y}
+													width={shape.width}
+													height={shape.height}
+													rx={shape.rx || undefined}
+													fill={color[shape.colorKey]}
+													transform={
+														shape.rotate
+															? `rotate(${shape.rotate.angle} ${shape.rotate.pivotX} ${shape.rotate.pivotY})`
+															: undefined
+													}
+												/>
+											) : (
+												<path
+													key={shape.colorKey}
+													d={shape.d}
+													fill={color[shape.colorKey]}
+												/>
+											)
+										)}
 									</g>
-									<g filter="url(#filter1_f_4740_1055)">
-										<path
-											d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z"
-											fill={color.cssShift2}
-										/>
-									</g>
-								</>
-							)}
+								))}
 						</g>
 						<defs>
-							{allData.style === "Gradient" && (
-								<>
-									<filter
-										id="filter0_f_4740_1055"
-										x="-24.1998"
-										y="-52.8004"
-										width="158.4"
-										height="137.5"
-										filterUnits="userSpaceOnUse"
-										colorInterpolationFilters="sRGB"
+							{gradientGeometry &&
+								gradientGeometry.masks.map((m) => (
+									<mask
+										key={m.id}
+										id={m.id}
+										style={{ maskType: m.maskType }}
+										maskUnits="userSpaceOnUse"
+										x={m.x}
+										y={m.y}
+										width={m.width}
+										height={m.height}
 									>
-										<feFlood floodOpacity="0" result="BackgroundImageFix" />
-										<feBlend
-											mode="normal"
-											in="SourceGraphic"
-											in2="BackgroundImageFix"
-											result="shape"
-										/>
-										<feGaussianBlur
-											stdDeviation="13.2"
-											result="effect1_foregroundBlur_4740_1055"
-										/>
-									</filter>
-									<filter
-										id="filter1_f_4740_1055"
-										x="4.4"
-										y="-24.1996"
-										width="98.9998"
-										height="81.4002"
-										filterUnits="userSpaceOnUse"
-										colorInterpolationFilters="sRGB"
-									>
-										<feFlood floodOpacity="0" result="BackgroundImageFix" />
-										<feBlend
-											mode="normal"
-											in="SourceGraphic"
-											in2="BackgroundImageFix"
-											result="shape"
-										/>
-										<feGaussianBlur
-											stdDeviation="8.8"
-											result="effect1_foregroundBlur_4740_1055"
-										/>
-									</filter>
-								</>
-							)}
+										{m.shape === "rect" ? (
+											<rect
+												width={m.rectWidth}
+												height={m.rectHeight}
+												rx={m.rectRx}
+												fill="white"
+												transform={`matrix(${m.matrix.join(" ")})`}
+											/>
+										) : (
+											<ellipse
+												cx={m.cx}
+												cy={m.cy}
+												rx={m.rx}
+												ry={m.ry}
+												fill="white"
+												transform={
+													m.rotate
+														? `rotate(${m.rotate.angle} ${m.rotate.pivotX} ${m.rotate.pivotY})`
+														: undefined
+												}
+											/>
+										)}
+									</mask>
+								))}
+							{gradientGeometry &&
+								gradientGeometry.filters.map((f) =>
+									f.type === "innerShadow" ? (
+										<filter
+											key={f.id}
+											id={f.id}
+											x={f.x}
+											y={f.y}
+											width={f.width}
+											height={f.height}
+											filterUnits="userSpaceOnUse"
+											colorInterpolationFilters="sRGB"
+										>
+											<feFlood floodOpacity="0" result="BackgroundImageFix" />
+											<feBlend
+												mode="normal"
+												in="SourceGraphic"
+												in2="BackgroundImageFix"
+												result="shape"
+											/>
+											<feColorMatrix
+												in="SourceAlpha"
+												type="matrix"
+												values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+												result="hardAlpha"
+											/>
+											<feOffset dx={f.dx} dy={f.dy} />
+											<feGaussianBlur stdDeviation={f.stdDeviation} />
+											<feComposite
+												in2="hardAlpha"
+												operator="arithmetic"
+												k2="-1"
+												k3="1"
+											/>
+											<feColorMatrix type="matrix" values={f.colorMatrix} />
+											<feBlend
+												mode="normal"
+												in2="shape"
+												result={`effect1_innerShadow_${f.id}`}
+											/>
+										</filter>
+									) : (
+										<filter
+											key={f.id}
+											id={f.id}
+											x={f.x}
+											y={f.y}
+											width={f.width}
+											height={f.height}
+											filterUnits="userSpaceOnUse"
+											colorInterpolationFilters="sRGB"
+										>
+											<feFlood floodOpacity="0" result="BackgroundImageFix" />
+											<feBlend
+												mode="normal"
+												in="SourceGraphic"
+												in2="BackgroundImageFix"
+												result="shape"
+											/>
+											<feGaussianBlur
+												stdDeviation={f.stdDeviation}
+												result={`effect1_foregroundBlur_${f.id}`}
+											/>
+										</filter>
+									)
+								)}
 							<linearGradient
 								id="paint0_linear_4740_1055"
 								x1="44"
@@ -204,8 +264,8 @@ export function CircleSample({ allData, color, i }: CircleSampleFormProps) {
 							</clipPath>
 						</defs>
 					</svg>
-				</motion.div>
+				</div>
 			</motion.div>
 		</>
 	);
-}
+});

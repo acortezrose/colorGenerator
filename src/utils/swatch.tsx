@@ -6,25 +6,28 @@ interface AllData {
 	colorInput: string;
 	numberInput: number;
 	harmony: "equidistant" | "monochromatic" | "analogous" | "complementary";
-	style: "gradient" | "flat";
+	style: string;
+	hueShift: number;
+	lightnessShift: number;
+	chromaShift: number;
+	harmonySpread: number;
 }
 
-export function computeSwatchData(allData: AllData) {
+function parseBaseColor(allData: AllData) {
 	const isValid = validateColorInput(
 		allData.colorInput,
 		allData.colorSpace.toLowerCase(),
 	);
 	if (!isValid) return null;
+	return convertColor(allData.colorInput, allData.colorSpace) || null;
+}
 
-	const convertedColor = convertColor(allData.colorInput, allData.colorSpace);
+// UI tints derived from the base color. Cheap enough to recompute on every
+// input change, so the form can follow the live value.
+export function computeSwatchTheme(allData: AllData) {
+	const convertedColor = parseBaseColor(allData);
 	if (!convertedColor) return null;
-
-	const samples = generateCircleSamples(
-		convertedColor,
-		allData.numberInput,
-		allData.harmony,
-	);
-	const swatchData = {
+	return {
 		swatchColor: `oklch(${convertedColor.l} ${convertedColor.c} ${convertedColor.h})`,
 		swatchColorDarkTint: `oklch(.5 ${convertedColor.c} ${convertedColor.h})`,
 		swatchColorDarkTint03: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .03)`,
@@ -34,7 +37,21 @@ export function computeSwatchData(allData: AllData) {
 		swatchColorDarkTint20: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .2)`,
 		swatchColorDarkTint40: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .4)`,
 		swatchColorDarkTint90: `oklch(.6 ${convertedColor.c} ${convertedColor.h} / .9)`,
-		circleSamples: samples,
 	};
-	return swatchData;
+}
+
+export function computeCircleSamples(allData: AllData) {
+	const convertedColor = parseBaseColor(allData);
+	if (!convertedColor) return null;
+	return generateCircleSamples(
+		convertedColor,
+		allData.numberInput,
+		allData.harmony,
+		{
+			hueShift: allData.hueShift,
+			lightnessShift: allData.lightnessShift,
+			chromaShift: allData.chromaShift,
+		},
+		allData.harmonySpread,
+	);
 }

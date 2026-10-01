@@ -13,7 +13,7 @@ export function SwatchPreview({ color, className }: SwatchPreviewProps) {
 				width: "100%",
 				height: "5.25em",
 				borderRadius: "0.5em",
-				border: "1px solid rgba(0,0,0,.1)",
+				boxShadow: "var(--surface-shadow)",
 				background: color,
 				flexShrink: 0,
 			}}

@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 		return (
 			<label
 				htmlFor={name}
-				className="input-group input-group-layout transition-shadow duration-200 ease focus-within:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(0,0,0,1)]"
+				className="input-group input-group-layout relative focus-within:z-10 transition-shadow duration-200 ease focus-within:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(0,0,0,1)]"
 			>
 				{label}
 				<input

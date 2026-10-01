@@ -1,38 +1,127 @@
 import { motion } from "framer-motion";
+import { RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Disclosure } from "@/components/ui/disclosure";
 import { SwatchPreview } from "@/components/ui/swatchPreview";
-import { SwatchFanModal } from "@/components/ui/swatchFanModal";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { convertColor, convertFromOklch } from "@/utils/colors.jsx";
+import {
+	GRADIENT_STYLE_GEOMETRY,
+	GRADIENT_STYLE_LABELS,
+	GRADIENT_STYLE_NAMES,
+	GRADIENT_STYLE_PRESETS,
+} from "@/generated/gradientArchetypes.js";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as culori from "culori";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 interface CircleSampleFormProps {
 	allData: any;
 	setAllData: any;
-	setAllDataImmediate: any;
 	swatchData: any;
+}
+
+const SHIFT_KEYS = [
+	"hueShift",
+	"chromaShift",
+	"lightnessShift",
+	"harmonySpread",
+] as const;
+const DEFAULT_SHIFTS = {
+	hueShift: 46,
+	chromaShift: 1,
+	lightnessShift: 0.7,
+	harmonySpread: 1,
+};
+
+// Small label above a section, styled to match the Advanced toggles. Pulled
+// down so it reads as part of the section below it.
+function SectionHeading({ children }: { children: React.ReactNode }) {
+	return (
+		<h2
+			className="text-sm px-1 py-1 text-neutral-600 -mb-5"
+			// Inline so it beats the global serif h2 rule in App.css.
+			style={{ fontFamily: "inherit", fontWeight: 400 }}
+		>
+			{children}
+		</h2>
+	);
+}
+
+// Sizes the title so its text spans the full width of its container.
+function FitHeading({ children }: { children: React.ReactNode }) {
+	const ref = useRef<HTMLHeadingElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useLayoutEffect(() => {
+		const el = ref.current;
+		const container = containerRef.current;
+		if (!el || !container) return;
+		const fit = () => {
+			el.style.fontSize = "100px";
+			const textWidth = el.scrollWidth;
+			if (textWidth) {
+				el.style.fontSize = `${(100 * container.clientWidth) / textWidth}px`;
+			}
+		};
+		fit();
+		// Refit once Big Shoulders loads, since the fallback font's width differs.
+		document.fonts?.load('900 100px "Big Shoulders"').then(fit);
+		const observer = new ResizeObserver(fit);
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, []);
+
+	// contain: inline-size keeps the heading's (large, unwrapped) width from
+	// feeding back into the layout, so the column can still shrink on narrow
+	// screens and the heading refits to whatever space is left.
+	return (
+		<div ref={containerRef} style={{ contain: "inline-size" }}>
+			<h1 ref={ref} className="inline-block">
+				{children}
+			</h1>
+		</div>
+	);
 }
 
 export function CircleSampleForm({
 	allData,
 	setAllData,
-	setAllDataImmediate,
 	swatchData,
 }: CircleSampleFormProps) {
-	const [isPickerOpen, setIsPickerOpen] = useState(false);
-	const [isSwatchHovered, setIsSwatchHovered] = useState(false);
+	// The base color as OKLCH, held locally so the sliders stay smooth while
+	// dragging instead of snapping to whatever survives the round trip through
+	// hex/rgb/hsl. Re-synced only when the text input changes from elsewhere.
+	const toBaseLch = (color, space) => {
+		const parsed = convertColor(color, space);
+		return parsed
+			? { l: parsed.l, c: parsed.c, h: parsed.h ?? 0 }
+			: { l: 0.5, c: 0, h: 0 };
+	};
+	const [baseLch, setBaseLch] = useState(() =>
+		toBaseLch(allData.colorInput, allData.colorSpace),
+	);
+	const lastEmittedInput = useRef(allData.colorInput);
+
+	useEffect(() => {
+		if (allData.colorInput === lastEmittedInput.current) return;
+		lastEmittedInput.current = allData.colorInput;
+		if (convertColor(allData.colorInput, allData.colorSpace)) {
+			setBaseLch(toBaseLch(allData.colorInput, allData.colorSpace));
+		}
+	}, [allData.colorInput, allData.colorSpace]);
+
+	const updateBaseLch = (key: "l" | "c" | "h") => (value: number) => {
+		const next = { ...baseLch, [key]: value };
+		setBaseLch(next);
+		const inGamut = culori.clampChroma({ mode: "oklch", ...next }, "oklch");
+		const colorInput = convertFromOklch(inGamut, allData.colorSpace);
+		lastEmittedInput.current = colorInput;
+		setAllData((prev) => ({ ...prev, colorInput }));
+	};
 
 	const handleColorSpaceChange = (newColorSpace) => {
 		const currentOklch = convertColor(allData.colorInput, allData.colorSpace);
@@ -55,13 +144,83 @@ export function CircleSampleForm({
 		}));
 	};
 
-	const applyFanColor = (l: number, c: number, h: number) => {
-		const hex = culori.formatHex(
-			culori.clampGamut("rgb")({ mode: "oklch", l, c, h }),
-		);
-		const next = { ...allData, colorSpace: "Hex", colorInput: hex };
-		setAllData(next);
-		setAllDataImmediate(next);
+	const updateGradientControl = (name: string) => (value: number) => {
+		setAllData((prev) => ({ ...prev, [name]: value }));
+	};
+
+	// Reset goes back to the current style's preset, not the app defaults.
+	const baseShifts = {
+		...DEFAULT_SHIFTS,
+		...GRADIENT_STYLE_PRESETS[allData.style],
+	};
+	// Equidistant already covers the full wheel, so it can only narrow.
+	const harmonySpreadMax = allData.harmony === "Equidistant" ? 1 : 2;
+	// With no style, only Harmony Shift is on screen, so only it resets.
+	const visibleShiftKeys =
+		allData.style === "None" ? (["harmonySpread"] as const) : SHIFT_KEYS;
+	const isShiftModified = visibleShiftKeys.some(
+		(key) => allData[key] !== baseShifts[key],
+	);
+	const resetShifts = () => {
+		setAllData((prev) => ({
+			...prev,
+			...Object.fromEntries(
+				visibleShiftKeys.map((key) => [key, baseShifts[key]]),
+			),
+		}));
+	};
+
+	const updateStyle = (style) => {
+		const preset = GRADIENT_STYLE_PRESETS[style];
+		setAllData((prev) => ({ ...prev, style, ...(preset || {}) }));
+	};
+
+	const buildGradientMarkup = (styleName, sample) => {
+		const geometry = GRADIENT_STYLE_GEOMETRY[styleName];
+		if (!geometry) return { shapes: "", defs: "" };
+		// mask and filter deliberately live on the same <g> (not nested wrapper
+		// groups) — Safari has a known bug where feGaussianBlur silently fails
+		// to apply to an element nested inside a masked group.
+		const shapes = geometry.groups
+			.map((group) => {
+				const paths = group.shapes
+					.map((shape) => {
+						const hex = culori.formatHex(culori.parse(sample[shape.colorKey]));
+						if (shape.type === "rect") {
+							const transformAttr = shape.rotate
+								? ` transform="rotate(${shape.rotate.angle} ${shape.rotate.pivotX} ${shape.rotate.pivotY})"`
+								: "";
+							return `<rect x="${shape.x}" y="${shape.y}" width="${shape.width}" height="${shape.height}" rx="${shape.rx}" fill="${hex}"${transformAttr} />`;
+						}
+						return `<path d="${shape.d}" fill="${hex}" />`;
+					})
+					.join("");
+				const maskAttr = group.maskId ? ` mask="url(#${group.maskId})"` : "";
+				return `<g filter="url(#${group.filterId})"${maskAttr}>${paths}</g>`;
+			})
+			.join("");
+		const maskDefs = geometry.masks
+			.map((m) => {
+				const shapeMarkup =
+					m.shape === "rect"
+						? `<rect width="${m.rectWidth}" height="${m.rectHeight}" rx="${m.rectRx}" fill="white" transform="matrix(${m.matrix.join(" ")})" />`
+						: `<ellipse cx="${m.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="white"${
+								m.rotate
+									? ` transform="rotate(${m.rotate.angle} ${m.rotate.pivotX} ${m.rotate.pivotY})"`
+									: ""
+							} />`;
+				return `<mask id="${m.id}" style="mask-type:${m.maskType}" maskUnits="userSpaceOnUse" x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}">${shapeMarkup}</mask>`;
+			})
+			.join("");
+		const filterDefs = geometry.filters
+			.map((f: any) => {
+				if (f.type === "innerShadow") {
+					return `<filter id="${f.id}" x="${f.x}" y="${f.y}" width="${f.width}" height="${f.height}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" /><feOffset dx="${f.dx}" dy="${f.dy}" /><feGaussianBlur stdDeviation="${f.stdDeviation}" /><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" /><feColorMatrix type="matrix" values="${f.colorMatrix}" /><feBlend mode="normal" in2="SourceGraphic" result="effect1_innerShadow_${f.id}" /></filter>`;
+				}
+				return `<filter id="${f.id}" x="${f.x}" y="${f.y}" width="${f.width}" height="${f.height}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="${f.stdDeviation}" result="effect1_foregroundBlur_${f.id}" /></filter>`;
+			})
+			.join("");
+		return { shapes, defs: maskDefs + filterDefs };
 	};
 
 	const downloadSVGs = async () => {
@@ -73,18 +232,11 @@ export function CircleSampleForm({
 				c: sample.c,
 				h: sample.h,
 			});
-			const hexShift1 = culori.formatHex(culori.parse(sample.cssShift1));
-			const hexShift2 = culori.formatHex(culori.parse(sample.cssShift2));
-			const svgParts = {
-				start: `<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4740_1055)"><rect width="88" height="88" fill="${hex}" />`,
-				gradient: `<g filter="url(#filter0_f_4740_1055)"><path d="M47.3002 58.2996L28.6002 48.3996L15.4002 16.4996V-5.50039L2.2002 -26.4004L24.2002 -15.4004L47.3002 23.0996L63.8002 31.8996L107.8 28.5996V48.3996L77.0002 58.2996H47.3002Z" fill="${hexShift1}" /></g><g filter="url(#filter1_f_4740_1055)"><path d="M85.8 -1.05561V28.5124V39.6004L48.8632 28.5124L32.0737 10.0324L22 -6.59961H48.8632L85.8 -1.05561Z" fill="${hexShift2}" /></g>`,
-				end: `</g>`,
-				defs: `<defs><filter id="filter0_f_4740_1055" x="-24.1998" y="-52.8004" width="158.4" height="137.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="13.2" result="effect1_foregroundBlur_4740_1055" /></filter><filter id="filter1_f_4740_1055" x="4.4" y="-24.1996" width="98.9998" height="81.4002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="8.8" result="effect1_foregroundBlur_4740_1055" /></filter><linearGradient id="paint0_linear_4740_1055" x1="44" y1="0" x2="44" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity="0.7" /><stop offset="1" stop-color="#4A5669" /></linearGradient><clipPath id="clip0_4740_1055"><rect width="88" height="88" fill="white" /></clipPath></defs></svg>`,
-			};
-			const svg =
-				allData.style === "Gradient"
-					? svgParts.start + svgParts.gradient + svgParts.end + svgParts.defs
-					: svgParts.start + svgParts.end + svgParts.defs;
+			const { shapes, defs } =
+				allData.style !== "None"
+					? buildGradientMarkup(allData.style, sample)
+					: { shapes: "", defs: "" };
+			const svg = `<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4740_1055)"><rect width="88" height="88" fill="${hex}" />${shapes}</g><defs>${defs}<linearGradient id="paint0_linear_4740_1055" x1="44" y1="0" x2="44" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity="0.7" /><stop offset="1" stop-color="#4A5669" /></linearGradient><clipPath id="clip0_4740_1055"><rect width="88" height="88" fill="white" /></clipPath></defs></svg>`;
 			zip.file(`swatch-${idx + 1}.svg`, svg);
 		});
 		const content = await zip.generateAsync({ type: "blob" });
@@ -95,7 +247,7 @@ export function CircleSampleForm({
 		<>
 			{/* TODO: rename? */}
 			<div>
-				<h1>okavatar</h1>
+				<FitHeading>okavatar</FitHeading>
 				<p className="text-base mt-1">
 					By{" "}
 					<a
@@ -107,51 +259,20 @@ export function CircleSampleForm({
 					</a>
 				</p>
 			</div>
-			<button
-				onClick={() => setIsPickerOpen(true)}
-				onMouseEnter={() => setIsSwatchHovered(true)}
-				onMouseLeave={() => setIsSwatchHovered(false)}
-				className="cursor-pointer w-full rounded-sm transition ease duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
-				aria-label="Open quick color picker"
-			>
-				<SwatchPreview color={swatchData.swatchColor} />
-			</button>
-			<SwatchFanModal
-				peek={isSwatchHovered && !isPickerOpen}
-				open={isPickerOpen}
-				onClose={() => setIsPickerOpen(false)}
-				onSelectColor={(l, c, h) => {
-					applyFanColor(l, c, h);
-					setIsPickerOpen(false);
-				}}
-			/>
+			<SwatchPreview color={swatchData.swatchColor} />
+			<SectionHeading>Color</SectionHeading>
 			<div className="form-group text-base">
-				<div className="input-group-layout">
-					<label htmlFor="colorSpace">Color Mode</label>
-					<Select
-						value={allData.colorSpace}
-						name="colorSpace"
-						onValueChange={handleColorSpaceChange}
-					>
-						<SelectTrigger
-							className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
-							style={{
-								background: swatchData.swatchColorDarkTint11,
-								color: swatchData.swatchColorDarkTint,
-							}}
-						>
-							<SelectValue placeholder="Select a color mode" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Color Mode</SelectLabel>
-								<SelectItem value="Hex">Hex</SelectItem>
-								<SelectItem value="RGB">RGB</SelectItem>
-								<SelectItem value="HSL">HSL</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
+				<Select
+					name="colorSpace"
+					label="Color Mode"
+					value={allData.colorSpace}
+					onChange={handleColorSpaceChange}
+					options={[
+						{ value: "Hex", label: "Hex" },
+						{ value: "RGB", label: "RGB" },
+						{ value: "HSL", label: "HSL" },
+					]}
+				/>
 				<hr />
 				<Input
 					name="colorInput"
@@ -162,7 +283,51 @@ export function CircleSampleForm({
 					onChange={updateData}
 					required
 				/>
-				<hr />
+			</div>
+			{/* Pulled up so the toggle reads as part of the section above it. */}
+			<Disclosure
+				label="Advanced"
+				ariaLabel="Advanced color settings"
+				className="-mt-5"
+			>
+				<div className="flex flex-col gap-2">
+					<Slider
+						name="baseLightness"
+						label="Lightness"
+						min={0}
+						max={1}
+						step={0.01}
+						value={Number(baseLch.l.toFixed(2))}
+						onValueChange={updateBaseLch("l")}
+						fillColor={swatchData.swatchColorDarkTint20}
+						labelColor={swatchData.swatchColorDarkTint}
+					/>
+					<Slider
+						name="baseChroma"
+						label="Chroma"
+						min={0}
+						max={0.37}
+						step={0.005}
+						value={Number(baseLch.c.toFixed(3))}
+						onValueChange={updateBaseLch("c")}
+						fillColor={swatchData.swatchColorDarkTint20}
+						labelColor={swatchData.swatchColorDarkTint}
+					/>
+					<Slider
+						name="baseHue"
+						label="Hue"
+						min={0}
+						max={360}
+						step={1}
+						value={Math.round(baseLch.h)}
+						onValueChange={updateBaseLch("h")}
+						fillColor={swatchData.swatchColorDarkTint20}
+						labelColor={swatchData.swatchColorDarkTint}
+					/>
+				</div>
+			</Disclosure>
+			<SectionHeading>Style</SectionHeading>
+			<div className="form-group text-base">
 				<Input
 					name="numberInput"
 					label="Number"
@@ -174,66 +339,102 @@ export function CircleSampleForm({
 					onChange={updateData}
 					required
 				/>
-			</div>
-			<div className="form-group text-base">
-				<div className="input-group-layout">
-					<label htmlFor="harmony">Harmony</label>
-					<Select
-						value={allData.harmony}
-						name="harmony"
-						onValueChange={(val) =>
-							setAllData((prev) => ({ ...prev, harmony: val }))
-						}
-					>
-						<SelectTrigger
-							className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
-							style={{
-								background: swatchData.swatchColorDarkTint11,
-								color: swatchData.swatchColorDarkTint,
-							}}
-						>
-							<SelectValue placeholder="Select a harmony" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Harmony</SelectLabel>
-								<SelectItem value="Equidistant">Equidistant</SelectItem>
-								<SelectItem value="Monochromatic">Monochromatic</SelectItem>
-								<SelectItem value="Analogous">Analogous</SelectItem>
-								<SelectItem value="Complementary">Complementary</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
 				<hr />
-				<div className="input-group-layout">
-					<label htmlFor="style">Style</label>
-					<Select
-						value={allData.style}
-						name="style"
-						onValueChange={(val) =>
-							setAllData((prev) => ({ ...prev, style: val }))
-						}
-					>
-						<SelectTrigger
-							className="select focus-visible:ring-[${swatchData.swatchColorDarkTint03}]"
-							style={{
-								background: swatchData.swatchColorDarkTint11,
-								color: swatchData.swatchColorDarkTint,
-							}}
-						>
-							<SelectValue placeholder="Select a style" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Style</SelectLabel>
-								<SelectItem value="Gradient">Gradient</SelectItem>
-								<SelectItem value="Flat">Flat</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
+				<Select
+					name="harmony"
+					label="Harmony"
+					value={allData.harmony}
+					onChange={(val) =>
+						setAllData((prev: any) => ({ ...prev, harmony: val }))
+					}
+					options={[
+						{ value: "Equidistant", label: "Equidistant" },
+						{ value: "Monochromatic", label: "Monochromatic" },
+						{ value: "Analogous", label: "Analogous" },
+						{ value: "Complementary", label: "Complementary" },
+					]}
+				/>
+				<hr />
+				<Select
+					name="style"
+					label="Style"
+					value={allData.style}
+					onChange={updateStyle}
+					options={[
+						{ value: "None", label: "None" },
+						...GRADIENT_STYLE_NAMES.map((name) => ({
+							value: name,
+							label: (GRADIENT_STYLE_LABELS as Record<string, string>)[name],
+						})),
+					]}
+				/>
 			</div>
+			<Disclosure
+				label="Advanced"
+				ariaLabel="Advanced style settings"
+				defaultOpen
+				className="-mt-5"
+			>
+				<div className="flex flex-col gap-2">
+					{allData.style !== "None" && (
+						<>
+							<Slider
+								name="hueShift"
+								label="Hue Shift"
+								min={-180}
+								max={180}
+								step={1}
+								value={allData.hueShift}
+								onValueChange={updateGradientControl("hueShift")}
+								fillColor={swatchData.swatchColorDarkTint20}
+								labelColor={swatchData.swatchColorDarkTint}
+							/>
+							<Slider
+								name="chromaShift"
+								label="Chroma Shift"
+								min={-1}
+								max={2}
+								step={0.05}
+								value={allData.chromaShift}
+								onValueChange={updateGradientControl("chromaShift")}
+								fillColor={swatchData.swatchColorDarkTint20}
+								labelColor={swatchData.swatchColorDarkTint}
+							/>
+							<Slider
+								name="lightnessShift"
+								label="Lightness Shift"
+								min={-0.5}
+								max={1.5}
+								step={0.01}
+								value={allData.lightnessShift}
+								onValueChange={updateGradientControl("lightnessShift")}
+								fillColor={swatchData.swatchColorDarkTint20}
+								labelColor={swatchData.swatchColorDarkTint}
+							/>
+						</>
+					)}
+					<Slider
+						name="harmonySpread"
+						label="Harmony Shift"
+						min={0}
+						max={harmonySpreadMax}
+						step={0.01}
+						value={Math.min(allData.harmonySpread, harmonySpreadMax)}
+						onValueChange={updateGradientControl("harmonySpread")}
+						fillColor={swatchData.swatchColorDarkTint20}
+						labelColor={swatchData.swatchColorDarkTint}
+					/>
+					<button
+						type="button"
+						onClick={resetShifts}
+						disabled={!isShiftModified}
+						className="self-end flex items-center gap-1.5 text-sm px-2 py-1 rounded-md text-neutral-600 cursor-pointer transition ease duration-150 hover:bg-black/5 hover:text-black disabled:opacity-40 disabled:cursor-default disabled:hover:bg-transparent focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(255,255,255),0_0_0_4px_rgb(0,0,0)]"
+					>
+						<RotateCcw size={12} strokeWidth={2.25} />
+						Reset shifts
+					</button>
+				</div>
+			</Disclosure>
 			{swatchData.circleSamples.length > 0 && (
 				<motion.button
 					onClick={downloadSVGs}
